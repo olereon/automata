@@ -1,3 +1,7 @@
 venv/
+workflows/
+credentials/
+html_pages/
+__pycache__/
 .roo/commands/
 AGENTS.md

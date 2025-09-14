@@ -229,6 +229,7 @@ class WorkflowValidator:
                 elif strict and step["next_step"]:
                     # Check if next_step references a valid step
                     # This will be checked in the main validate_workflow method
+                    pass
             
             # Check for incompatible combinations
             if "condition" in step and "loop" in step:

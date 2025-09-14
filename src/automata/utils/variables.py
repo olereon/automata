@@ -5,7 +5,7 @@ Variable management system for storing and using dynamic values.
 import json
 import re
 import os
-from typing import Dict, Any, Optional, List, Union, Tuple
+from typing import Dict, Any, Optional, List, Union
 from datetime import datetime
 from ..core.errors import AutomationError
 from ..core.logger import get_logger
@@ -525,3 +525,120 @@ class VariableManager:
         except Exception as e:
             logger.error(f"Error appending to variable '{name}': {e}")
             raise AutomationError(f"Error appending to variable '{name}': {e}")
+
+    def bulk_set_variables(self, variables: Dict[str, Any], persist: bool = False) -> None:
+        """
+        Set multiple variables at once.
+
+        Args:
+            variables: Dictionary of variable names and values
+            persist: Whether to persist the variables to disk
+        """
+        try:
+            for name, value in variables.items():
+                self.set_variable(name, value, persist)
+            
+            logger.debug(f"Bulk set {len(variables)} variables")
+        
+        except Exception as e:
+            logger.error(f"Error bulk setting variables: {e}")
+            raise AutomationError(f"Error bulk setting variables: {e}")
+
+    def bulk_get_variables(self, names: List[str]) -> Dict[str, Any]:
+        """
+        Get multiple variables at once.
+
+        Args:
+            names: List of variable names
+
+        Returns:
+            Dictionary of variable names and values
+        """
+        try:
+            result = {}
+            for name in names:
+                result[name] = self.get_variable(name)
+            
+            logger.debug(f"Bulk get {len(names)} variables")
+            return result
+        
+        except Exception as e:
+            logger.error(f"Error bulk getting variables: {e}")
+            raise AutomationError(f"Error bulk getting variables: {e}")
+
+    def bulk_delete_variables(self, names: List[str]) -> Dict[str, bool]:
+        """
+        Delete multiple variables at once.
+
+        Args:
+            names: List of variable names
+
+        Returns:
+            Dictionary of variable names and deletion status
+        """
+        try:
+            result = {}
+            for name in names:
+                result[name] = self.delete_variable(name)
+            
+            logger.debug(f"Bulk delete {len(names)} variables")
+            return result
+        
+        except Exception as e:
+            logger.error(f"Error bulk deleting variables: {e}")
+            raise AutomationError(f"Error bulk deleting variables: {e}")
+
+    def inject_variables_from_dict(self, data: Dict[str, Any], prefix: str = "") -> None:
+        """
+        Inject variables from a dictionary, with optional prefix.
+
+        Args:
+            data: Dictionary containing variables
+            prefix: Optional prefix for variable names
+        """
+        try:
+            for key, value in data.items():
+                # Apply prefix if provided
+                var_name = f"{prefix}{key}" if prefix else key
+                
+                # Set the variable
+                self.set_variable(var_name, value)
+            
+            logger.debug(f"Injected {len(data)} variables from dictionary with prefix '{prefix}'")
+        
+        except Exception as e:
+            logger.error(f"Error injecting variables from dictionary: {e}")
+            raise AutomationError(f"Error injecting variables from dictionary: {e}")
+
+    def extract_variables_to_dict(self, prefix: str = "") -> Dict[str, Any]:
+        """
+        Extract variables to a dictionary, with optional prefix filtering.
+
+        Args:
+            prefix: Optional prefix to filter variables
+
+        Returns:
+            Dictionary containing variables
+        """
+        try:
+            result = {}
+            
+            # Get all variable names
+            var_names = self.list_variables()
+            
+            # Filter by prefix if provided
+            if prefix:
+                var_names = [name for name in var_names if name.startswith(prefix)]
+            
+            # Get variable values
+            for name in var_names:
+                # Remove prefix when adding to result
+                key = name[len(prefix):] if prefix and name.startswith(prefix) else name
+                result[key] = self.get_variable(name)
+            
+            logger.debug(f"Extracted {len(result)} variables to dictionary with prefix '{prefix}'")
+            return result
+        
+        except Exception as e:
+            logger.error(f"Error extracting variables to dictionary: {e}")
+            raise AutomationError(f"Error extracting variables to dictionary: {e}")

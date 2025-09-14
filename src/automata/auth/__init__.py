@@ -26,6 +26,11 @@ from .credential_file import (
     CredentialFileWebAuthenticator
 )
 
+from .credentials_json import (
+    CredentialsJsonAuthProvider,
+    CredentialsJsonWebAuthenticator
+)
+
 from .interactive import (
     InteractiveAuthProvider,
     InteractiveWebAuthenticator
@@ -56,6 +61,10 @@ __all__ = [
     # Credential file authentication
     "CredentialFileAuthProvider",
     "CredentialFileWebAuthenticator",
+    
+    # JSON credentials authentication
+    "CredentialsJsonAuthProvider",
+    "CredentialsJsonWebAuthenticator",
     
     # Interactive authentication
     "InteractiveAuthProvider",

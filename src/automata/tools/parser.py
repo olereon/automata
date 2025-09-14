@@ -630,3 +630,60 @@ class HTMLParser:
         except Exception as e:
             logger.error(f"Error finding elements by tag: {e}")
             return []
+
+    def parse_file(self, file_path: str) -> Dict[str, Any]:
+        """
+        Parse HTML from a file and extract element information.
+
+        Args:
+            file_path: Path to the HTML file
+
+        Returns:
+            Dictionary with parsed page information
+        """
+        logger.info(f"Parsing HTML file: {file_path}")
+        
+        try:
+            # Read HTML file
+            with open(file_path, "r", encoding="utf-8") as f:
+                html_content = f.read()
+            
+            # Parse HTML
+            parsed_html = html.fromstring(html_content)
+            
+            # Extract page information
+            page_info = {
+                "url": f"file://{file_path}",
+                "title": self._extract_title(parsed_html),
+                "elements": self._extract_elements(parsed_html),
+                "forms": self._extract_forms(parsed_html),
+                "links": self._extract_links(parsed_html),
+                "images": self._extract_images(parsed_html),
+                "tables": self._extract_tables(parsed_html)
+            }
+            
+            logger.info(f"HTML file parsed successfully: {file_path}")
+            return page_info
+        
+        except Exception as e:
+            logger.error(f"Error parsing HTML file: {e}")
+            raise AutomationError(f"Error parsing HTML file: {e}")
+
+    def _extract_title(self, parsed_html: html.HtmlElement) -> str:
+        """
+        Extract title from parsed HTML.
+
+        Args:
+            parsed_html: Parsed HTML element
+
+        Returns:
+            Title string
+        """
+        try:
+            title_elements = parsed_html.xpath("//title")
+            if title_elements:
+                return title_elements[0].text_content().strip() if title_elements[0].text_content() else ""
+            return ""
+        except Exception as e:
+            logger.warning(f"Error extracting title: {e}")
+            return ""

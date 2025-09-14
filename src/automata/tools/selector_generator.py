@@ -2,7 +2,9 @@
 Selector generator tool that converts HTML to robust selectors.
 """
 
+import os
 import re
+import sys
 from typing import Dict, Any, Optional, List, Union, Tuple
 from lxml import html, etree
 from ..core.errors import AutomationError
@@ -19,6 +21,10 @@ class SelectorGenerator:
         self.attribute_priority = [
             "id", "name", "data-testid", "data-test", "data-cy", "data-qa",
             "title", "alt", "placeholder", "type", "value", "href", "src"
+        ]
+        self.important_elements = [
+            "button", "input", "a", "select", "textarea", "form",
+            "img", "table", "tr", "td", "th", "ul", "ol", "li"
         ]
 
     def generate_selectors(self, html_content: str, element_info: Dict[str, Any]) -> Dict[str, str]:
@@ -548,3 +554,497 @@ class SelectorGenerator:
         except Exception as e:
             logger.warning(f"Error optimizing selector: {e}")
             return selector
+
+    def generate_from_file(self, file_path: str, element_info: Dict[str, Any]) -> Dict[str, str]:
+        """
+        Generate selectors for an element from an HTML file.
+
+        Args:
+            file_path: Path to the HTML file
+            element_info: Element information containing xpath or css_selector
+
+        Returns:
+            Dictionary with different types of selectors
+        """
+        logger.info(f"Generating selectors from HTML file: {file_path}")
+        
+        try:
+            # Read HTML file
+            with open(file_path, "r", encoding="utf-8") as f:
+                html_content = f.read()
+            
+            # Generate selectors
+            selectors = self.generate_selectors(html_content, element_info)
+            
+            logger.info(f"Generated {len(selectors)} selectors from file: {file_path}")
+            return selectors
+        
+        except Exception as e:
+            logger.error(f"Error generating selectors from file: {e}")
+            raise AutomationError(f"Error generating selectors from file: {e}")
+
+    def save_selectors(self, selectors: Dict[str, str], output_path: str) -> None:
+        """
+        Save selectors to a file.
+
+        Args:
+            selectors: Dictionary of selectors
+            output_path: Path to save the file
+        """
+        logger.info(f"Saving selectors to: {output_path}")
+        
+        try:
+            import json
+            
+            with open(output_path, "w", encoding="utf-8") as f:
+                json.dump(selectors, f, indent=2)
+            
+            logger.info(f"Selectors saved successfully to: {output_path}")
+        
+        except Exception as e:
+            logger.error(f"Error saving selectors: {e}")
+            raise AutomationError(f"Error saving selectors: {e}")
+
+    def is_html_fragment(self, html_content: str) -> bool:
+        """
+        Detect if the input is an HTML fragment (missing DOCTYPE, html, or body tags).
+
+        Args:
+            html_content: HTML content to check
+
+        Returns:
+            True if the content is a fragment, False if it's a complete HTML document
+        
+        Raises:
+            AutomationError: If the HTML content is invalid or empty
+        """
+        try:
+            # Check if HTML content is empty
+            if not html_content or not html_content.strip():
+                raise AutomationError("HTML content is empty")
+            
+            # Normalize whitespace and convert to lowercase for checking
+            normalized = html_content.strip().lower()
+            
+            # Check if it has DOCTYPE
+            if normalized.startswith('<!doctype'):
+                return False
+            
+            # Check if it has html tag
+            if '<html' in normalized[:1000]:  # Check first 1000 chars for efficiency
+                return False
+            
+            # Check if it has body tag
+            if '<body' in normalized[:1000]:  # Check first 1000 chars for efficiency
+                return False
+            
+            # If none of the above, it's likely a fragment
+            return True
+        
+        except AutomationError:
+            # Re-raise AutomationError as-is
+            raise
+        except Exception as e:
+            logger.warning(f"Error detecting HTML fragment: {e}")
+            # Default to treating as fragment if detection fails
+            return True
+
+    def wrap_html_fragment(self, html_fragment: str) -> str:
+        """
+        Wrap an HTML fragment in a basic HTML structure.
+
+        Args:
+            html_fragment: HTML fragment to wrap
+
+        Returns:
+            Complete HTML document with the fragment wrapped in body tags
+        
+        Raises:
+            AutomationError: If the HTML fragment is invalid or cannot be wrapped
+        """
+        try:
+            # Check if HTML fragment is empty
+            if not html_fragment or not html_fragment.strip():
+                raise AutomationError("HTML fragment is empty")
+            
+            # Strip leading/trailing whitespace from the fragment
+            fragment = html_fragment.strip()
+            
+            # Basic validation - check if it contains at least one HTML tag
+            if not re.search(r'<[^>]+>', fragment):
+                raise AutomationError("HTML fragment does not contain any valid HTML tags")
+            
+            # Create the wrapper HTML
+            wrapped_html = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>HTML Fragment</title>
+</head>
+<body>
+{fragment}
+</body>
+</html>"""
+            
+            # Validate the wrapped HTML by trying to parse it
+            try:
+                html.fromstring(wrapped_html)
+            except Exception as parse_error:
+                raise AutomationError(f"Wrapped HTML is invalid: {parse_error}")
+            
+            return wrapped_html
+        
+        except AutomationError:
+            # Re-raise AutomationError as-is
+            raise
+        except Exception as e:
+            logger.error(f"Error wrapping HTML fragment: {e}")
+            raise AutomationError(f"Error wrapping HTML fragment: {e}")
+
+    def generate_from_fragment(
+        self,
+        html_fragment: str,
+        targeting_mode: str = "all",
+        custom_selector: Optional[str] = None,
+        selector_type: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Generate selectors for elements in an HTML fragment.
+
+        Args:
+            html_fragment: HTML fragment content
+            targeting_mode: How to target elements ("all", "selector", "auto")
+            custom_selector: Custom selector to use when targeting_mode is "selector"
+            selector_type: Type of custom selector ("css" or "xpath")
+
+        Returns:
+            Dictionary with selectors for targeted elements
+        
+        Raises:
+            AutomationError: If there's an error processing the HTML fragment or generating selectors
+        """
+        logger.info(f"Generating selectors from HTML fragment with targeting mode: {targeting_mode}")
+        
+        try:
+            # Validate targeting mode
+            if targeting_mode not in ["all", "selector", "auto"]:
+                raise AutomationError(f"Invalid targeting mode: {targeting_mode}. Must be one of: all, selector, auto")
+            
+            # Validate custom selector parameters
+            if targeting_mode == "selector":
+                if not custom_selector:
+                    raise AutomationError("Custom selector is required when targeting_mode is 'selector'")
+                if not custom_selector.strip():
+                    raise AutomationError("Custom selector cannot be empty")
+                if selector_type and selector_type not in ["css", "xpath"]:
+                    raise AutomationError(f"Invalid selector type: {selector_type}. Must be one of: css, xpath")
+            
+            # Check if it's a fragment and wrap if needed
+            if self.is_html_fragment(html_fragment):
+                logger.info("Detected HTML fragment, wrapping in complete HTML structure")
+                html_content = self.wrap_html_fragment(html_fragment)
+            else:
+                html_content = html_fragment
+            
+            # Parse HTML
+            try:
+                parsed_html = html.fromstring(html_content)
+            except Exception as parse_error:
+                raise AutomationError(f"Failed to parse HTML content: {parse_error}")
+            
+            # Find target elements based on targeting mode
+            target_elements = []
+            
+            if targeting_mode == "all":
+                # Get all elements in the fragment
+                target_elements = self._get_all_elements(parsed_html)
+            elif targeting_mode == "selector":
+                # Use custom selector to find elements
+                target_elements = self._find_elements_by_selector(
+                    parsed_html, custom_selector, selector_type or "css"
+                )
+                
+                # Check if any elements were found
+                if not target_elements:
+                    logger.warning(f"No elements found using selector: {custom_selector}")
+                    return {}
+            elif targeting_mode == "auto":
+                # Auto-detect important elements
+                target_elements = self._auto_detect_important_elements(parsed_html)
+            
+            if not target_elements:
+                logger.warning("No target elements found in HTML fragment")
+                return {}
+            
+            # Generate selectors for each target element
+            results = {}
+            for i, element in enumerate(target_elements):
+                # Create element info for this element
+                element_info = {}
+                
+                # Try to generate a unique identifier for this element
+                element_id = f"element_{i}"
+                
+                # Generate selectors for this element
+                selectors = self._generate_selectors_for_element(element, html_content)
+                
+                if selectors:
+                    results[element_id] = {
+                        "selectors": selectors,
+                        "element_tag": element.tag,
+                        "element_text": element.text_content().strip()[:50] if element.text_content() else ""
+                    }
+            
+            logger.info(f"Generated selectors for {len(results)} elements from HTML fragment")
+            return results
+        
+        except AutomationError:
+            # Re-raise AutomationError as-is
+            raise
+        except Exception as e:
+            logger.error(f"Error generating selectors from HTML fragment: {e}")
+            raise AutomationError(f"Error generating selectors from HTML fragment: {e}")
+
+    def _generate_selectors_for_element(self, element: html.HtmlElement, html_content: str) -> Dict[str, str]:
+        """
+        Generate selectors for a specific element.
+
+        Args:
+            element: HTML element to generate selectors for
+            html_content: Full HTML content
+
+        Returns:
+            Dictionary with different types of selectors
+        """
+        try:
+            # Generate different types of selectors
+            selectors = {
+                "xpath": self._generate_xpath(element),
+                "css": self._generate_css_selector(element),
+                "id": self._generate_id_selector(element),
+                "name": self._generate_name_selector(element),
+                "text": self._generate_text_selector(element),
+                "attribute": self._generate_attribute_selector(element),
+                "combined": self._generate_combined_selector(element)
+            }
+            
+            # Filter out empty selectors
+            selectors = {k: v for k, v in selectors.items() if v}
+            
+            return selectors
+        
+        except Exception as e:
+            logger.warning(f"Error generating selectors for element: {e}")
+            return {}
+
+    def _get_all_elements(self, parsed_html: html.HtmlElement) -> List[html.HtmlElement]:
+        """
+        Get all elements from the parsed HTML.
+
+        Args:
+            parsed_html: Parsed HTML document
+
+        Returns:
+            List of all HTML elements
+        """
+        try:
+            # Use XPath to get all elements
+            all_elements = parsed_html.xpath("//*")
+            
+            # Filter out the html and body elements as they're part of our wrapper
+            filtered_elements = [el for el in all_elements if el.tag not in ["html", "body"]]
+            
+            return filtered_elements
+        
+        except Exception as e:
+            logger.warning(f"Error getting all elements: {e}")
+            return []
+
+    def _find_elements_by_selector(
+        self,
+        parsed_html: html.HtmlElement,
+        selector: str,
+        selector_type: str
+    ) -> List[html.HtmlElement]:
+        """
+        Find elements using a custom selector.
+
+        Args:
+            parsed_html: Parsed HTML document
+            selector: Selector to use
+            selector_type: Type of selector ("css" or "xpath")
+
+        Returns:
+            List of matching HTML elements
+        
+        Raises:
+            AutomationError: If the selector is invalid or cannot be processed
+        """
+        try:
+            if not selector or not selector.strip():
+                raise AutomationError("Selector cannot be empty")
+            
+            elements = []
+            
+            if selector_type == "css":
+                try:
+                    elements = parsed_html.cssselect(selector)
+                except Exception as css_error:
+                    raise AutomationError(f"Invalid CSS selector '{selector}': {css_error}")
+            elif selector_type == "xpath":
+                try:
+                    elements = parsed_html.xpath(selector)
+                except Exception as xpath_error:
+                    raise AutomationError(f"Invalid XPath selector '{selector}': {xpath_error}")
+            else:
+                raise AutomationError(f"Unsupported selector type: {selector_type}")
+            
+            return elements
+        
+        except AutomationError:
+            # Re-raise AutomationError as-is
+            raise
+        except Exception as e:
+            logger.warning(f"Error finding elements by selector: {e}")
+            return []
+
+    def _auto_detect_important_elements(self, parsed_html: html.HtmlElement) -> List[html.HtmlElement]:
+        """
+        Auto-detect important elements in the HTML.
+
+        Args:
+            parsed_html: Parsed HTML document
+
+        Returns:
+            List of important HTML elements
+        """
+        try:
+            important_elements = []
+            
+            # Find elements with important tags
+            for tag in self.important_elements:
+                elements = parsed_html.xpath(f"//{tag}")
+                important_elements.extend(elements)
+            
+            # Find elements with IDs
+            id_elements = parsed_html.xpath("//*[@id]")
+            important_elements.extend(id_elements)
+            
+            # Find elements with test attributes
+            for attr in ["data-testid", "data-test", "data-cy", "data-qa"]:
+                elements = parsed_html.xpath(f"//*[@{attr}]")
+                important_elements.extend(elements)
+            
+            # Remove duplicates while preserving order
+            seen = set()
+            unique_elements = []
+            for element in important_elements:
+                if element not in seen:
+                    seen.add(element)
+                    unique_elements.append(element)
+            
+            return unique_elements
+        
+        except Exception as e:
+            logger.warning(f"Error auto-detecting important elements: {e}")
+            return []
+
+    def generate_from_fragment_file(
+        self,
+        file_path: str,
+        targeting_mode: str = "all",
+        custom_selector: Optional[str] = None,
+        selector_type: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Generate selectors for elements from an HTML fragment file.
+
+        Args:
+            file_path: Path to the HTML fragment file
+            targeting_mode: How to target elements ("all", "selector", "auto")
+            custom_selector: Custom selector to use when targeting_mode is "selector"
+            selector_type: Type of custom selector ("css" or "xpath")
+
+        Returns:
+            Dictionary with selectors for targeted elements
+        
+        Raises:
+            AutomationError: If there's an error reading the file or generating selectors
+        """
+        logger.info(f"Generating selectors from HTML fragment file: {file_path}")
+        
+        try:
+            # Check if file exists
+            if not os.path.exists(file_path):
+                raise AutomationError(f"File not found: {file_path}")
+            
+            # Check if it's a file (not a directory)
+            if not os.path.isfile(file_path):
+                raise AutomationError(f"Path is not a file: {file_path}")
+            
+            # Read HTML fragment file
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    html_fragment = f.read()
+            except Exception as file_error:
+                raise AutomationError(f"Error reading file {file_path}: {file_error}")
+            
+            # Check if file is empty
+            if not html_fragment or not html_fragment.strip():
+                raise AutomationError(f"File is empty: {file_path}")
+            
+            # Generate selectors
+            results = self.generate_from_fragment(
+                html_fragment, targeting_mode, custom_selector, selector_type
+            )
+            
+            logger.info(f"Generated selectors for {len(results)} elements from file: {file_path}")
+            return results
+        
+        except AutomationError:
+            # Re-raise AutomationError as-is
+            raise
+        except Exception as e:
+            logger.error(f"Error generating selectors from fragment file: {e}")
+            raise AutomationError(f"Error generating selectors from fragment file: {e}")
+
+    def generate_from_stdin(
+        self,
+        targeting_mode: str = "all",
+        custom_selector: Optional[str] = None,
+        selector_type: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Generate selectors for elements from HTML fragment read from stdin.
+
+        Args:
+            targeting_mode: How to target elements ("all", "selector", "auto")
+            custom_selector: Custom selector to use when targeting_mode is "selector"
+            selector_type: Type of custom selector ("css" or "xpath")
+
+        Returns:
+            Dictionary with selectors for targeted elements
+        """
+        logger.info("Generating selectors from HTML fragment from stdin")
+        
+        try:
+            # Read HTML fragment from stdin
+            if sys.stdin.isatty():
+                # No input from stdin
+                raise AutomationError("No HTML fragment provided via stdin")
+            
+            html_fragment = sys.stdin.read()
+            
+            if not html_fragment.strip():
+                raise AutomationError("Empty HTML fragment provided via stdin")
+            
+            # Generate selectors
+            results = self.generate_from_fragment(
+                html_fragment, targeting_mode, custom_selector, selector_type
+            )
+            
+            logger.info(f"Generated selectors for {len(results)} elements from stdin")
+            return results
+        
+        except Exception as e:
+            logger.error(f"Error generating selectors from stdin: {e}")
+            raise AutomationError(f"Error generating selectors from stdin: {e}")

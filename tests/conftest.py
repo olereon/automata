@@ -10,12 +10,11 @@ from typing import Dict, Any, List, Optional
 import pytest
 from playwright.async_api import Browser, BrowserContext, Page
 from src.automata.core.browser import BrowserManager
-from src.automata.core.session import SessionManager
-from src.automata.core.wait import WaitManager
-from src.automata.core.element import ElementSelector
-from src.automata.core.variables import VariableManager
-from src.automata.core.conditions import ConditionProcessor
-from src.automata.core.loops import LoopProcessor
+from src.automata.core.wait import WaitUtils
+from src.automata.core.selector import ElementSelector
+from src.automata.utils.variables import VariableManager
+from src.automata.utils.conditional import ConditionalProcessor
+from src.automata.utils.loops import LoopProcessor
 from src.automata.workflow import (
     WorkflowSchema,
     WorkflowBuilder,
@@ -23,12 +22,9 @@ from src.automata.workflow import (
     WorkflowTemplateManager,
     WorkflowExecutionEngine
 )
-from src.automata.helper import (
-    HtmlParser,
-    SelectorGenerator,
-    ActionBuilder,
-    FileIO
-)
+from src.automata.tools.selector_generator import SelectorGenerator
+from src.automata.tools.action_builder import ActionBuilder
+from src.automata.utils.file_io import FileIO
 
 
 @pytest.fixture(scope="session")
@@ -73,21 +69,15 @@ def browser_manager():
 
 
 @pytest.fixture
-def session_manager(browser_manager):
-    """Create a session manager for testing."""
-    return SessionManager(browser_manager)
+def wait_utils():
+    """Create a wait utils for testing."""
+    return WaitUtils()
 
 
 @pytest.fixture
-def wait_manager():
-    """Create a wait manager for testing."""
-    return WaitManager()
-
-
-@pytest.fixture
-def element_selector(wait_manager):
+def element_selector():
     """Create an element selector for testing."""
-    return ElementSelector(wait_manager)
+    return ElementSelector()
 
 
 @pytest.fixture
@@ -99,7 +89,7 @@ def variable_manager():
 @pytest.fixture
 def condition_processor(variable_manager):
     """Create a condition processor for testing."""
-    return ConditionProcessor(variable_manager)
+    return ConditionalProcessor(variable_manager)
 
 
 @pytest.fixture
@@ -140,8 +130,7 @@ def workflow_template_manager(workflow_schema, workflow_validator):
 @pytest.fixture
 def workflow_execution_engine(
     browser_manager,
-    session_manager,
-    wait_manager,
+    wait_utils,
     element_selector,
     variable_manager,
     condition_processor,
@@ -152,8 +141,7 @@ def workflow_execution_engine(
     """Create a workflow execution engine for testing."""
     return WorkflowExecutionEngine(
         browser_manager=browser_manager,
-        session_manager=session_manager,
-        wait_manager=wait_manager,
+        wait_utils=wait_utils,
         element_selector=element_selector,
         variable_manager=variable_manager,
         condition_processor=condition_processor,
@@ -161,12 +149,6 @@ def workflow_execution_engine(
         schema=workflow_schema,
         validator=workflow_validator
     )
-
-
-@pytest.fixture
-def html_parser():
-    """Create an HTML parser for testing."""
-    return HtmlParser()
 
 
 @pytest.fixture

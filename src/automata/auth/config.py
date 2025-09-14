@@ -11,6 +11,7 @@ import logging
 from .base import AuthenticationManager, AuthMethod
 from .environment import EnvironmentAuthProvider, EnvironmentWebAuthenticator
 from .credential_file import CredentialFileAuthProvider, CredentialFileWebAuthenticator
+from .credentials_json import CredentialsJsonAuthProvider, CredentialsJsonWebAuthenticator
 from .interactive import InteractiveAuthProvider, InteractiveWebAuthenticator
 from .session import SessionAuthProvider, CookieManager
 from ..core.errors import AutomationError
@@ -93,6 +94,11 @@ class AuthenticationConfig:
                     "username_key": "username",
                     "password_key": "password"
                 },
+                "credentials_json": {
+                    "enabled": True,
+                    "priority": 2,
+                    "path": None
+                },
                 "interactive": {
                     "enabled": True,
                     "priority": 3,
@@ -127,6 +133,11 @@ class AuthenticationConfig:
                         "format": "json",
                         "username_key": "username",
                         "password_key": "password"
+                    },
+                    "credentials_json": {
+                        "enabled": True,
+                        "priority": 2,
+                        "path": None
                     },
                     "interactive": {
                         "enabled": True,
@@ -174,6 +185,12 @@ class AuthenticationConfig:
         self.auth_manager.register_provider(
             AuthMethod.CREDENTIAL_FILE,
             CredentialFileAuthProvider()
+        )
+        
+        # Register JSON credentials provider
+        self.auth_manager.register_provider(
+            AuthMethod.CREDENTIALS_JSON,
+            CredentialsJsonAuthProvider()
         )
         
         # Register interactive provider
@@ -458,6 +475,8 @@ class AuthenticationFactory:
             return EnvironmentWebAuthenticator(engine)
         elif method == AuthMethod.CREDENTIAL_FILE:
             return CredentialFileWebAuthenticator(engine)
+        elif method == AuthMethod.CREDENTIALS_JSON:
+            return CredentialsJsonWebAuthenticator(engine)
         elif method == AuthMethod.INTERACTIVE:
             return InteractiveWebAuthenticator(engine)
         elif method == AuthMethod.SESSION:

@@ -13,6 +13,7 @@
   - [Workflow Structure](#workflow-structure)
   - [Step Actions](#step-actions)
   - [Variables and Conditions](#variables-and-conditions)
+- [Credential Management](#credential-management)
 - [Examples](#examples)
   - [Simple Web Scraping](#simple-web-scraping)
   - [Form Submission](#form-submission)
@@ -141,6 +142,16 @@ automata workflow execute my_workflow.json
 
 This will execute the workflow and display the results.
 
+#### Execute a Workflow with Credentials
+
+To execute a workflow with credentials from a JSON file, use the `--credentials` parameter:
+
+```bash
+automata workflow execute my_workflow.json --credentials path/to/credentials.json
+```
+
+This will load the credentials from the specified JSON file and make them available to your workflow. For more information on the credentials JSON format, see the [Credential Management](#credential-management) section.
+
 #### Validate a Workflow
 
 Before executing a workflow, you can validate it using the `workflow validate` command:
@@ -248,6 +259,30 @@ To generate selectors from an HTML file, use the `helper generate-selectors` com
 ```bash
 automata helper generate-selectors page.html --output selectors.json
 ```
+
+**NEW:** The generate-selectors tool now supports HTML fragments directly, with multiple input methods and targeting modes:
+
+```bash
+# Using direct HTML fragment
+automata helper generate-selectors --html-fragment "<div class='container'><button id='submit'>Submit</button></div>"
+
+# Using a fragment file
+automata helper generate-selectors --fragment-file path/to/fragment.html
+
+# Using stdin (piping)
+echo "<div class='container'><button id='submit'>Submit</button></div>" | automata helper generate-selectors --stdin
+
+# Generate selectors with specific targeting mode
+automata helper generate-selectors --html-fragment "<div><button>Click</button></div>" --targeting-mode selector --custom-selector "button"
+
+# Generate XPath selectors instead of CSS
+automata helper generate-selectors --html-fragment "<div><button>Click</button></div>" --selector-type xpath
+```
+
+The tool supports three targeting modes:
+- "all" (default): Generate selectors for all elements
+- "selector": Generate selectors for elements matching a specific selector
+- "auto": Automatically detect important elements
 
 #### Build Action
 
@@ -660,6 +695,160 @@ Conditions are used in `if` actions and step conditions to control the flow of t
   ]
 }
 ```
+
+## Credential Management
+
+Automata provides a secure way to manage and use credentials in your workflows. This feature allows you to store authentication information in JSON files and use them in your workflows without hardcoding sensitive data.
+
+### Credentials JSON Format
+
+The credentials JSON file should follow this format:
+
+```json
+{
+  "config": {
+    "auth_type": "credentials_json"
+  },
+  "credentials": {
+    "username": "your_username",
+    "password": "your_password",
+    "api_key": "your_api_key",
+    "custom_field": "custom_value"
+  }
+}
+```
+
+#### Required Fields
+
+- `config`: Configuration section
+  - `auth_type`: Must be set to "credentials_json"
+- `credentials`: Credentials section containing your authentication data
+
+#### Optional Fields
+
+The `credentials` section can contain any number of key-value pairs depending on what your workflow requires. Common fields include:
+
+- `username`: Username for authentication
+- `password`: Password for authentication
+- `api_key`: API key for API access
+- `token`: Authentication token
+- Any custom fields required by your workflow
+
+### Using Credentials in Workflows
+
+Once loaded, credentials can be accessed in your workflows using variable substitution:
+
+```json
+{
+  "name": "Login Workflow",
+  "version": "1.0.0",
+  "steps": [
+    {
+      "name": "Navigate to login page",
+      "action": "navigate",
+      "value": "https://example.com/login"
+    },
+    {
+      "name": "Enter username",
+      "action": "type",
+      "selector": "#username",
+      "value": "{{credentials.username}}"
+    },
+    {
+      "name": "Enter password",
+      "action": "type",
+      "selector": "#password",
+      "value": "{{credentials.password}}"
+    },
+    {
+      "name": "Click login button",
+      "action": "click",
+      "selector": "#login-button"
+    }
+  ]
+}
+```
+
+### Security Considerations
+
+- **File Permissions**: Ensure your credentials files have appropriate file permissions to prevent unauthorized access.
+- **Environment Variables**: For sensitive credentials, consider using environment variables instead of storing them in files.
+- **Encryption**: For additional security, you can encrypt your credentials files and decrypt them at runtime.
+- **Git Ignore**: Add credentials files to your `.gitignore` to prevent accidentally committing them to version control.
+
+### Examples
+
+#### Basic Authentication
+
+```json
+{
+  "config": {
+    "auth_type": "credentials_json"
+  },
+  "credentials": {
+    "username": "john.doe",
+    "password": "securepassword123"
+  }
+}
+```
+
+#### API Authentication
+
+```json
+{
+  "config": {
+    "auth_type": "credentials_json"
+  },
+  "credentials": {
+    "api_key": "abcdef123456",
+    "api_secret": "secretkey789",
+    "environment": "production"
+  }
+}
+```
+
+#### Multi-Service Authentication
+
+```json
+{
+  "config": {
+    "auth_type": "credentials_json"
+  },
+  "credentials": {
+    "database": {
+      "host": "db.example.com",
+      "username": "dbuser",
+      "password": "dbpass"
+    },
+    "api": {
+      "key": "api_key_123",
+      "secret": "api_secret_456"
+    },
+    "email": {
+      "smtp_server": "smtp.example.com",
+      "username": "email@example.com",
+      "password": "emailpass"
+    }
+  }
+}
+```
+
+### Error Handling
+
+The credential handling feature includes comprehensive error handling:
+
+- **File Not Found**: If the specified credentials file doesn't exist, the workflow will fail with a clear error message.
+- **Invalid JSON**: If the credentials file contains invalid JSON, the workflow will fail with a parsing error.
+- **Missing Required Fields**: If required fields are missing from the credentials file, the workflow will fail with a validation error.
+- **Invalid Configuration**: If the configuration section is invalid or missing, the workflow will fail with a configuration error.
+
+### Best Practices
+
+1. **Use Separate Credentials Files**: Use different credentials files for different environments (development, staging, production).
+2. **Template Variables**: Combine credentials with template variables for flexible workflow configuration.
+3. **Validation**: Always validate that credentials are loaded correctly before using them in your workflow.
+4. **Error Handling**: Implement proper error handling in your workflows to gracefully handle authentication failures.
+5. **Security**: Never commit credentials files to version control. Use environment variables or secret management tools for sensitive data.
 
 ## Examples
 

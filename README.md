@@ -6,6 +6,11 @@ A lightweight and fast web automation app for personal use, focusing on CLI-base
 
 - CLI-based web automation using Playwright
 - Helper tools for element selection and action building
+- **NEW:** HTML Fragment Support - Generate selectors directly from HTML fragments
+- **NEW:** Multiple Input Methods - Support for direct HTML input, fragment files, and stdin
+- **NEW:** Flexible Targeting Modes - "all", "selector", and "auto" modes for element selection
+- **NEW:** CSS and XPath Selector Generation - Choose your preferred selector type
+- **NEW:** Credential Management - Securely manage and use credentials in workflows
 - Support for multiple authentication methods
 - Workflow-based automation with JSON configuration
 - Robust element selection with fallback mechanisms
@@ -44,6 +49,11 @@ A lightweight and fast web automation app for personal use, focusing on CLI-base
 - Run automation workflow:
   ```bash
   automata run workflow.json
+  ```
+
+- Run automation workflow with credentials:
+  ```bash
+  automata run workflow.json --credentials credentials.json
   ```
 
 - Build a workflow:

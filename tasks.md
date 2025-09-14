@@ -21,6 +21,7 @@
 [x] Design flexible authentication framework supporting multiple methods
 [x] Implement environment variable-based authentication
 [x] Add support for credential file-based authentication
+[x] Add support for JSON credentials file with bulk variable injection
 [x] Create interactive login authentication module
 [x] Develop session persistence and cookie management
 [x] Implement authentication method selection and configuration

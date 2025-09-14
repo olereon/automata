@@ -771,3 +771,144 @@ class ActionBuilder:
     def __iter__(self):
         """Iterate over actions."""
         return iter(self.actions)
+
+    def build_action_interactive(self) -> Dict[str, Any]:
+        """
+        Build an action interactively by prompting the user for input.
+
+        Returns:
+            Action dictionary
+        """
+        logger.info("Building action interactively")
+        
+        try:
+            # Import here to avoid circular imports if this method is called during module initialization
+            from ..utils.interactive import prompt_user, prompt_choice
+            
+            # Prompt for action type
+            action_types = [action_type.value for action_type in ActionType]
+            action_type = prompt_choice("Select action type:", action_types)
+            
+            # Create base action
+            action = {"type": action_type}
+            
+            # Add parameters based on action type
+            action_enum = ActionType(action_type)
+            
+            if action_enum == ActionType.NAVIGATE:
+                url = prompt_user("Enter URL:")
+                action["url"] = url
+                
+                timeout = prompt_user("Enter timeout (ms, leave empty for default):", optional=True)
+                if timeout:
+                    action["timeout"] = int(timeout)
+            
+            elif action_enum in [ActionType.CLICK, ActionType.DOUBLE_CLICK, ActionType.RIGHT_CLICK,
+                               ActionType.HOVER, ActionType.FILL, ActionType.SELECT, ActionType.CHECK,
+                               ActionType.UNCHECK, ActionType.UPLOAD_FILE, ActionType.PRESS_KEY,
+                               ActionType.WAIT_FOR, ActionType.SWITCH_TO_FRAME]:
+                # Get selector
+                selector = prompt_user("Enter selector:")
+                action["selector"] = selector
+                
+                # Get selector type
+                selector_types = ["css", "xpath"]
+                selector_type = prompt_choice("Select selector type:", selector_types)
+                action["selector_type"] = selector_type
+                
+                # Get timeout
+                timeout = prompt_user("Enter timeout (ms, leave empty for default):", optional=True)
+                if timeout:
+                    action["timeout"] = int(timeout)
+                
+                # Add action-specific parameters
+                if action_enum in [ActionType.CLICK, ActionType.DOUBLE_CLICK, ActionType.RIGHT_CLICK, ActionType.HOVER]:
+                    force = prompt_choice("Force action?", ["yes", "no"]) == "yes"
+                    if force:
+                        action["force"] = force
+                
+                if action_enum == ActionType.FILL:
+                    value = prompt_user("Enter value to fill:")
+                    action["value"] = value
+                    
+                    clear = prompt_choice("Clear field before filling?", ["yes", "no"]) == "yes"
+                    if not clear:
+                        action["clear"] = clear
+                    
+                    delay = prompt_user("Enter delay between keystrokes (ms, leave empty for default):", optional=True)
+                    if delay:
+                        action["delay"] = int(delay)
+                
+                elif action_enum == ActionType.SELECT:
+                    value = prompt_user("Enter value to select:")
+                    action["value"] = value
+                
+                elif action_enum == ActionType.UPLOAD_FILE:
+                    file_path = prompt_user("Enter file path:")
+                    action["file_path"] = file_path
+                
+                elif action_enum == ActionType.PRESS_KEY:
+                    key = prompt_user("Enter key to press:")
+                    action["key"] = key
+                    
+                    delay = prompt_user("Enter delay after key press (ms, leave empty for default):", optional=True)
+                    if delay:
+                        action["delay"] = int(delay)
+                
+                elif action_enum == ActionType.WAIT_FOR:
+                    states = ["visible", "hidden", "attached", "detached"]
+                    state = prompt_choice("Select state to wait for:", states)
+                    action["state"] = state
+            
+            elif action_enum == ActionType.WAIT_FOR_NAVIGATION:
+                timeout = prompt_user("Enter timeout (ms, leave empty for default):", optional=True)
+                if timeout:
+                    action["timeout"] = int(timeout)
+                
+                url = prompt_user("Enter URL to wait for (leave empty for any):", optional=True)
+                if url:
+                    action["url"] = url
+                
+                wait_until = prompt_user("Enter wait until condition (load, domcontentloaded, networkidle, leave empty for default):", optional=True)
+                if wait_until:
+                    action["wait_until"] = wait_until
+            
+            elif action_enum == ActionType.SCREENSHOT:
+                path = prompt_user("Enter path to save screenshot (leave empty for no save):", optional=True)
+                if path:
+                    action["path"] = path
+                
+                full_page = prompt_choice("Full page screenshot?", ["yes", "no"]) == "yes"
+                if full_page:
+                    action["full_page"] = full_page
+                
+                element_only = prompt_choice("Screenshot specific element?", ["yes", "no"]) == "yes"
+                if element_only:
+                    selector = prompt_user("Enter element selector:")
+                    action["selector"] = selector
+                    
+                    selector_types = ["css", "xpath"]
+                    selector_type = prompt_choice("Select selector type:", selector_types)
+                    action["selector_type"] = selector_type
+            
+            elif action_enum == ActionType.EXECUTE_SCRIPT:
+                script = prompt_user("Enter JavaScript script:")
+                action["script"] = script
+                
+                arg = prompt_user("Enter argument for script (leave empty for no argument):", optional=True)
+                if arg:
+                    # Try to parse as JSON, otherwise treat as string
+                    try:
+                        action["arg"] = json.loads(arg)
+                    except json.JSONDecodeError:
+                        action["arg"] = arg
+            
+            # Add the action to the builder
+            self._add_action(action)
+            
+            logger.info(f"Built action interactively: {action}")
+            return action
+        
+        except Exception as e:
+            logger.error(f"Error building action interactively: {e}")
+            raise AutomationError(f"Error building action interactively: {e}")

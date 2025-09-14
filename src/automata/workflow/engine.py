@@ -12,12 +12,14 @@ from ..core.errors import AutomationError
 from ..core.logger import get_logger
 from ..core.engine import AutomationEngine
 from ..core.browser import BrowserManager
-from ..core.session import SessionManager
-from ..core.wait import WaitManager
-from ..core.element import ElementSelector
-from ..core.variables import VariableManager
-from ..core.conditions import ConditionProcessor
-from ..core.loops import LoopProcessor
+from ..utils import FileIO
+from ..utils import VariableManager
+from ..utils import ConditionalProcessor
+from ..utils import LoopProcessor
+from ..core.wait import WaitUtils
+from ..tools import HTMLParser
+from ..tools import SelectorGenerator
+from ..tools import ActionBuilder
 from .schema import WorkflowSchema
 from .validator import WorkflowValidator
 
@@ -27,13 +29,15 @@ logger = get_logger(__name__)
 class WorkflowExecutionEngine:
     """Executes automation workflows."""
 
-    def __init__(self, 
+    def __init__(self,
                  browser_manager: Optional[BrowserManager] = None,
-                 session_manager: Optional[SessionManager] = None,
-                 wait_manager: Optional[WaitManager] = None,
-                 element_selector: Optional[ElementSelector] = None,
+                 wait_utils: Optional[WaitUtils] = None,
+                 html_parser: Optional[HTMLParser] = None,
+                 selector_generator: Optional[SelectorGenerator] = None,
+                 action_builder: Optional[ActionBuilder] = None,
+                 file_io: Optional[FileIO] = None,
                  variable_manager: Optional[VariableManager] = None,
-                 condition_processor: Optional[ConditionProcessor] = None,
+                 conditional_processor: Optional[ConditionalProcessor] = None,
                  loop_processor: Optional[LoopProcessor] = None,
                  schema: Optional[WorkflowSchema] = None,
                  validator: Optional[WorkflowValidator] = None):
@@ -52,12 +56,14 @@ class WorkflowExecutionEngine:
             validator: Workflow validator instance
         """
         self.browser_manager = browser_manager or BrowserManager()
-        self.session_manager = session_manager or SessionManager(self.browser_manager)
-        self.wait_manager = wait_manager or WaitManager()
-        self.element_selector = element_selector or ElementSelector(self.wait_manager)
+        self.wait_utils = wait_utils or WaitUtils()
+        self.html_parser = html_parser or HTMLParser()
+        self.selector_generator = selector_generator or SelectorGenerator()
+        self.action_builder = action_builder or ActionBuilder()
+        self.file_io = file_io or FileIO()
         self.variable_manager = variable_manager or VariableManager()
-        self.condition_processor = condition_processor or ConditionProcessor(self.variable_manager)
-        self.loop_processor = loop_processor or LoopProcessor(self.variable_manager, self.condition_processor)
+        self.conditional_processor = conditional_processor or ConditionalProcessor(self.variable_manager)
+        self.loop_processor = loop_processor or LoopProcessor(self.variable_manager, self.conditional_processor)
         self.schema = schema or WorkflowSchema()
         self.validator = validator or WorkflowValidator(self.schema)
         
@@ -200,7 +206,7 @@ class WorkflowExecutionEngine:
             try:
                 # Check if step has a condition
                 if "condition" in step:
-                    condition_result = await self.condition_processor.evaluate_condition(step["condition"])
+                    condition_result = await self.conditional_processor.evaluate_condition(step["condition"])
                     if not condition_result:
                         logger.info(f"Step '{step_name}' condition not met, skipping")
                         result["status"] = "skipped"
@@ -392,7 +398,7 @@ class WorkflowExecutionEngine:
         selector = self.variable_manager.substitute_variables(selector)
         
         # Click element
-        await self.element_selector.click_element(self.page, selector)
+        await self.html_parser.click_element(self.page, selector)
         
         return {"selector": selector}
 
@@ -420,7 +426,7 @@ class WorkflowExecutionEngine:
         value = self.variable_manager.substitute_variables(str(value))
         
         # Type value into element
-        await self.element_selector.type_text(self.page, selector, value)
+        await self.html_parser.type_text(self.page, selector, value)
         
         return {"selector": selector, "value": value}
 
@@ -442,7 +448,7 @@ class WorkflowExecutionEngine:
         selector = self.variable_manager.substitute_variables(selector)
         
         # Hover over element
-        await self.element_selector.hover_element(self.page, selector)
+        await self.html_parser.hover_element(self.page, selector)
         
         return {"selector": selector}
 
@@ -466,7 +472,7 @@ class WorkflowExecutionEngine:
         selector = self.variable_manager.substitute_variables(selector)
         
         # Wait for element
-        await self.wait_manager.wait_for_selector(self.page, selector, timeout * 1000)
+        await self.wait_utils.wait_for_selector(self.page, selector, timeout * 1000)
         
         return {"selector": selector, "timeout": timeout}
 
@@ -510,7 +516,7 @@ class WorkflowExecutionEngine:
         selector = self.variable_manager.substitute_variables(selector)
         
         # Get text from element
-        text = await self.element_selector.get_text(self.page, selector)
+        text = await self.html_parser.get_text(self.page, selector)
         
         return {"selector": selector, "text": text}
 
@@ -538,7 +544,7 @@ class WorkflowExecutionEngine:
         attribute = self.variable_manager.substitute_variables(attribute)
         
         # Get attribute from element
-        attr_value = await self.element_selector.get_attribute(self.page, selector, attribute)
+        attr_value = await self.html_parser.get_attribute(self.page, selector, attribute)
         
         return {"selector": selector, "attribute": attribute, "value": attr_value}
 
@@ -626,7 +632,7 @@ class WorkflowExecutionEngine:
         selector = self.variable_manager.substitute_variables(selector)
         
         # Extract data from elements
-        data = await self.element_selector.extract_data(self.page, selector, config)
+        data = await self.html_parser.extract_data(self.page, selector, config)
         
         return {"selector": selector, "data": data}
 
@@ -721,7 +727,7 @@ class WorkflowExecutionEngine:
             raise AutomationError("Condition is required for if action")
         
         # Evaluate condition
-        condition_result = await self.condition_processor.evaluate_condition(condition)
+        condition_result = await self.conditional_processor.evaluate_condition(condition)
         
         return {"condition": condition, "result": condition_result}
 

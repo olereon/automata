@@ -4,28 +4,22 @@ Main CLI entry point for web automation.
 
 import asyncio
 import json
+import logging
 import os
 import sys
-from typing import Dict, Any, List, Optional, Union
 import click
 from click import echo, style, prompt, confirm
-from ..core.errors import AutomationError
-from ..core.logger import get_logger, setup_logging
+from ..core.logger import get_logger
 from ..workflow import (
-    WorkflowSchema,
     WorkflowBuilder,
     WorkflowValidator,
     WorkflowTemplateManager,
     WorkflowExecutionEngine
 )
-from ..helper import (
-    HtmlParser,
+from ..tools import (
+    HTMLParser,
     SelectorGenerator,
-    ActionBuilder,
-    FileIO,
-    VariableManager,
-    ConditionProcessor,
-    LoopProcessor
+    ActionBuilder
 )
 
 logger = get_logger(__name__)
@@ -43,8 +37,8 @@ def cli(ctx, verbose, config):
     web automation workflows.
     """
     # Set up logging
-    log_level = "DEBUG" if verbose else "INFO"
-    setup_logging(level=log_level)
+    log_level = logging.DEBUG if verbose else logging.INFO
+    logger = get_logger(level=log_level)
     
     # Initialize context
     ctx.ensure_object(dict)
@@ -86,12 +80,43 @@ def create(ctx, output):
 
 @workflow.command()
 @click.argument('file_path', type=click.Path(exists=True))
+@click.option('--credentials', type=click.Path(exists=True), help='Path to JSON credentials file')
 @click.pass_context
-def execute(ctx, file_path):
+def execute(ctx, file_path, credentials):
     """Execute a workflow from a file."""
     try:
         # Initialize workflow execution engine
         engine = WorkflowExecutionEngine()
+        
+        # Load credentials if provided
+        if credentials:
+            from ..auth.config import AuthenticationConfig
+            
+            # Initialize authentication config
+            auth_config = AuthenticationConfig()
+            
+            # Authenticate using credentials JSON file
+            result = asyncio.run(auth_config.authenticate(
+                method="credentials_json",
+                path=credentials
+            ))
+            
+            if not result.get("success", False):
+                echo(style(f"Error loading credentials: {result.get('error', 'Unknown error')}", fg="red"))
+                sys.exit(1)
+            
+            # Extract credentials and config from session data
+            session_data = result.get("session_data", {})
+            credentials_data = session_data.get("credentials", {})
+            config_data = session_data.get("config", {})
+            custom_fields = session_data.get("custom_fields", {})
+            
+            # Inject credentials into variable manager
+            engine.variable_manager.bulk_set_variables(credentials_data)
+            engine.variable_manager.bulk_set_variables(config_data)
+            engine.variable_manager.bulk_set_variables(custom_fields)
+            
+            echo(style(f"Credentials loaded from: {credentials}", fg="green"))
         
         # Load workflow
         builder = WorkflowBuilder()
@@ -361,7 +386,7 @@ def parse_html(ctx, file_path):
     """Parse HTML file and extract element information."""
     try:
         # Initialize HTML parser
-        parser = HtmlParser()
+        parser = HTMLParser()
         
         # Parse HTML file
         elements = parser.parse_file(file_path)
@@ -377,26 +402,86 @@ def parse_html(ctx, file_path):
 
 
 @helper.command()
-@click.argument('file_path', type=click.Path(exists=True))
+@click.option('--file', '-f', type=click.Path(exists=True), help='Path to HTML file')
+@click.option('--html-fragment', help='Direct HTML fragment input')
+@click.option('--fragment-file', type=click.Path(exists=True), help='Path to HTML fragment file')
+@click.option('--stdin', is_flag=True, help='Read HTML fragment from stdin')
+@click.option('--targeting-mode', type=click.Choice(['all', 'selector', 'auto']), default='auto',
+              help='How to target elements: all elements, specific selector, or auto-detection')
+@click.option('--custom-selector', help='Custom selector to use when targeting-mode is "selector"')
+@click.option('--selector-type', type=click.Choice(['css', 'xpath']), default='css',
+              help='Type of custom selector (css or xpath)')
 @click.option('--output', '-o', type=click.Path(), help='Output file path')
 @click.pass_context
-def generate_selectors(ctx, file_path, output):
-    """Generate selectors from HTML file."""
+def generate_selectors(ctx, file, html_fragment, fragment_file, stdin, targeting_mode,
+                      custom_selector, selector_type, output):
+    """Generate selectors from HTML file or fragment."""
     try:
         # Initialize selector generator
         generator = SelectorGenerator()
         
-        # Generate selectors
-        selectors = generator.generate_from_file(file_path)
+        # Determine input source and generate selectors
+        results = {}
+        
+        if file:
+            # Legacy mode - generate selectors from file with existing method
+            if custom_selector:
+                # If custom selector is provided, use element_info format
+                element_info = {}
+                if selector_type == 'css':
+                    element_info['css_selector'] = custom_selector
+                else:
+                    element_info['xpath'] = custom_selector
+                
+                selectors = generator.generate_from_file(file, element_info)
+                results = {'element_0': {'selectors': selectors}}
+            else:
+                # Use legacy method for backward compatibility
+                selectors = generator.generate_from_file(file)
+                results = {'element_0': {'selectors': selectors}}
+        elif html_fragment:
+            # Generate selectors from HTML fragment
+            results = generator.generate_from_fragment(
+                html_fragment, targeting_mode, custom_selector, selector_type
+            )
+        elif fragment_file:
+            # Generate selectors from fragment file
+            results = generator.generate_from_fragment_file(
+                fragment_file, targeting_mode, custom_selector, selector_type
+            )
+        elif stdin:
+            # Generate selectors from stdin
+            results = generator.generate_from_stdin(
+                targeting_mode, custom_selector, selector_type
+            )
+        else:
+            echo(style("Error: No input source specified. Use --file, --html-fragment, --fragment-file, or --stdin", fg="red"))
+            sys.exit(1)
+        
+        if not results:
+            echo(style("No selectors generated. Check your input and targeting options.", fg="yellow"))
+            return
         
         # Determine output file path
         if not output:
-            output = f"{os.path.splitext(file_path)[0]}_selectors.json"
+            if file:
+                output = f"{os.path.splitext(file)[0]}_selectors.json"
+            elif fragment_file:
+                output = f"{os.path.splitext(fragment_file)[0]}_selectors.json"
+            else:
+                output = "selectors.json"
         
-        # Save selectors
-        generator.save_selectors(selectors, output)
+        # Save results
+        with open(output, "w", encoding="utf-8") as f:
+            json.dump(results, f, indent=2)
         
+        # Print summary
         echo(style(f"Selectors generated and saved to: {output}", fg="green"))
+        echo(f"Generated selectors for {len(results)} elements:")
+        
+        for element_id, element_data in results.items():
+            best_type, best_selector = generator.get_best_selector(element_data['selectors'])
+            echo(f"  - {element_id} ({element_data['element_tag']}): {best_type} = {best_selector}")
     
     except Exception as e:
         echo(style(f"Error generating selectors: {e}", fg="red"))

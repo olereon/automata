@@ -6,6 +6,7 @@
 - [Selector Generator](#selector-generator)
 - [Action Builder](#action-builder)
 - [File I/O Utilities](#file-io-utilities)
+- [Credential Handling](#credential-handling)
 - [Examples and Use Cases](#examples-and-use-cases)
 
 ## Introduction
@@ -128,8 +129,13 @@ The Selector Generator tool allows you to generate robust CSS selectors from HTM
 - Optimize selectors for robustness and reliability
 - Provide multiple selector options with different specificity levels
 - Export selectors to JSON format
+- **NEW:** HTML Fragment Support - Accepts outerHTML fragments directly and automatically wraps them in a basic HTML structure
+- **NEW:** Multiple Input Methods - Supports direct HTML input, fragment files, and stdin
+- **NEW:** Three Targeting Modes - "all", "selector", and "auto" for flexible element selection
 
 ### CLI Usage
+
+#### Basic Usage
 
 To generate selectors from an HTML file using the CLI:
 
@@ -147,6 +153,67 @@ You can also specify a target element to generate a selector for:
 
 ```bash
 automata helper generate-selectors path/to/file.html --target "#submit-button"
+```
+
+#### New HTML Fragment Support
+
+The tool now supports HTML fragments directly, which are automatically wrapped in a basic HTML structure:
+
+```bash
+# Using direct HTML fragment
+automata helper generate-selectors --html-fragment "<div class='container'><button id='submit'>Submit</button></div>"
+
+# Using a fragment file
+automata helper generate-selectors --fragment-file path/to/fragment.html
+
+# Using stdin (piping)
+echo "<div class='container'><button id='submit'>Submit</button></div>" | automata helper generate-selectors --stdin
+```
+
+#### New Targeting Modes
+
+The tool now supports three targeting modes:
+
+1. **"all"** (default): Generate selectors for all elements in the fragment
+2. **"selector"**: Generate selectors for elements matching a specific selector
+3. **"auto"**: Automatically detect important elements
+
+```bash
+# Generate selectors for all elements (default)
+automata helper generate-selectors --html-fragment "<div><button>Click</button></div>" --targeting-mode all
+
+# Generate selectors for elements matching a specific selector
+automata helper generate-selectors --html-fragment "<div><button>Click</button></div>" --targeting-mode selector --custom-selector "button"
+
+# Auto-detect important elements
+automata helper generate-selectors --html-fragment "<div><button>Click</button></div>" --targeting-mode auto
+```
+
+#### New Selector Type Support
+
+You can now specify the type of selectors to generate:
+
+```bash
+# Generate CSS selectors (default)
+automata helper generate-selectors --html-fragment "<div><button>Click</button></div>" --selector-type css
+
+# Generate XPath selectors
+automata helper generate-selectors --html-fragment "<div><button>Click</button></div>" --selector-type xpath
+```
+
+#### Combined Examples
+
+Here are some examples combining the new features:
+
+```bash
+# Generate XPath selectors for all elements in a fragment
+automata helper generate-selectors --html-fragment "<div class='container'><button id='submit'>Submit</button></div>" --selector-type xpath --targeting-mode all
+
+# Generate CSS selectors for specific elements in a fragment file
+automata helper generate-selectors --fragment-file path/to/fragment.html --selector-type css --targeting-mode selector --custom-selector "button"
+
+# Auto-detect important elements from piped HTML and save to file
+echo "<div class='container'><button id='submit'>Submit</button></div>" | automata helper generate-selectors --stdin --targeting-mode auto --output selectors.json
 ```
 
 ### Programmatic Usage
@@ -417,6 +484,180 @@ automata helper write-file data.json --data '{"results": [...]}' --format json
 ```
 
 This will read data from a CSV file and write it to a JSON file, effectively converting the format.
+
+## Credential Handling
+
+The Credential Handling feature allows you to securely manage and use credentials in your workflows. This is particularly useful for workflows that require authentication, such as logging into websites or accessing APIs.
+
+### Features
+
+- Load credentials from JSON files
+- Support for multiple credential formats
+- Secure credential storage and handling
+- Integration with workflow execution
+- Comprehensive error handling and validation
+
+### CLI Usage
+
+#### Using Credentials with Workflow Execution
+
+To use credentials when executing a workflow, use the `--credentials` parameter:
+
+```bash
+automata workflow execute my_workflow.json --credentials path/to/credentials.json
+```
+
+This will load the credentials from the specified JSON file and make them available to your workflow.
+
+### Credentials JSON Format
+
+The credentials JSON file should follow this format:
+
+```json
+{
+  "config": {
+    "auth_type": "credentials_json"
+  },
+  "credentials": {
+    "username": "your_username",
+    "password": "your_password",
+    "api_key": "your_api_key",
+    "custom_field": "custom_value"
+  }
+}
+```
+
+#### Required Fields
+
+- `config`: Configuration section
+  - `auth_type`: Must be set to "credentials_json"
+- `credentials`: Credentials section containing your authentication data
+
+#### Optional Fields
+
+The `credentials` section can contain any number of key-value pairs depending on what your workflow requires. Common fields include:
+
+- `username`: Username for authentication
+- `password`: Password for authentication
+- `api_key`: API key for API access
+- `token`: Authentication token
+- Any custom fields required by your workflow
+
+### Using Credentials in Workflows
+
+Once loaded, credentials can be accessed in your workflows using variable substitution:
+
+```json
+{
+  "name": "Login Workflow",
+  "version": "1.0.0",
+  "steps": [
+    {
+      "name": "Navigate to login page",
+      "action": "navigate",
+      "value": "https://example.com/login"
+    },
+    {
+      "name": "Enter username",
+      "action": "type",
+      "selector": "#username",
+      "value": "{{credentials.username}}"
+    },
+    {
+      "name": "Enter password",
+      "action": "type",
+      "selector": "#password",
+      "value": "{{credentials.password}}"
+    },
+    {
+      "name": "Click login button",
+      "action": "click",
+      "selector": "#login-button"
+    }
+  ]
+}
+```
+
+### Security Considerations
+
+- **File Permissions**: Ensure your credentials files have appropriate file permissions to prevent unauthorized access.
+- **Environment Variables**: For sensitive credentials, consider using environment variables instead of storing them in files.
+- **Encryption**: For additional security, you can encrypt your credentials files and decrypt them at runtime.
+- **Git Ignore**: Add credentials files to your `.gitignore` to prevent accidentally committing them to version control.
+
+### Error Handling
+
+The credential handling feature includes comprehensive error handling:
+
+- **File Not Found**: If the specified credentials file doesn't exist, the workflow will fail with a clear error message.
+- **Invalid JSON**: If the credentials file contains invalid JSON, the workflow will fail with a parsing error.
+- **Missing Required Fields**: If required fields are missing from the credentials file, the workflow will fail with a validation error.
+- **Invalid Configuration**: If the configuration section is invalid or missing, the workflow will fail with a configuration error.
+
+### Examples
+
+#### Basic Authentication
+
+```json
+{
+  "config": {
+    "auth_type": "credentials_json"
+  },
+  "credentials": {
+    "username": "john.doe",
+    "password": "securepassword123"
+  }
+}
+```
+
+#### API Authentication
+
+```json
+{
+  "config": {
+    "auth_type": "credentials_json"
+  },
+  "credentials": {
+    "api_key": "abcdef123456",
+    "api_secret": "secretkey789",
+    "environment": "production"
+  }
+}
+```
+
+#### Multi-Service Authentication
+
+```json
+{
+  "config": {
+    "auth_type": "credentials_json"
+  },
+  "credentials": {
+    "database": {
+      "host": "db.example.com",
+      "username": "dbuser",
+      "password": "dbpass"
+    },
+    "api": {
+      "key": "api_key_123",
+      "secret": "api_secret_456"
+    },
+    "email": {
+      "smtp_server": "smtp.example.com",
+      "username": "email@example.com",
+      "password": "emailpass"
+    }
+  }
+}
+```
+
+### Best Practices
+
+1. **Use Separate Credentials Files**: Use different credentials files for different environments (development, staging, production).
+2. **Template Variables**: Combine credentials with template variables for flexible workflow configuration.
+3. **Validation**: Always validate that credentials are loaded correctly before using them in your workflow.
+4. **Error Handling**: Implement proper error handling in your workflows to gracefully handle authentication failures.
+5. **Security**: Never commit credentials files to version control. Use environment variables or secret management tools for sensitive data.
 
 ## Examples and Use Cases
 

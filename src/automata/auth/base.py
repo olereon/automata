@@ -17,6 +17,7 @@ class AuthMethod(Enum):
     """Enumeration of authentication methods."""
     ENVIRONMENT = "environment"
     CREDENTIAL_FILE = "credential_file"
+    CREDENTIALS_JSON = "credentials_json"
     INTERACTIVE = "interactive"
     SESSION = "session"
 
