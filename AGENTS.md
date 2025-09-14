@@ -35,8 +35,8 @@ This file provides guidance to agents when working with code in this repository.
 - ONLY READ or UPDATE the task status in the tasks.md. Code Mode is PROHIBITED from creating a new tasks.md file if it already exists.
 - Modes can create and manage their own TODO file(s) (naming schema: {task_name}_todo.md) to track the execution of their given task with its subtasks. 
 
-## MVP plan and Todo list files location
-- mvp plan is located in mvp_plan.md (/home/olereon/workspace/github.com/olereon/0_GLM-RooCode/automata/mvp_plan.md)
+## MVP prd and Todo list files location
+- mvp prd is located in mvp_prd.md (/home/olereon/workspace/github.com/olereon/0_GLM-RooCode/automata/mvp_prd.md)
 - todo list is located in tasks.md (/home/olereon/workspace/github.com/olereon/0_GLM-RooCode/automata/tasks.md)
 
 ## Update the tasks.md todo list
