@@ -1207,8 +1207,12 @@ If the default CSS selectors don't work for your use case, you can use XPath sel
   "name": "Click element",
   "action": "click",
   "selector": "xpath=//div[@class='button']"
+
 }
 ```
+When using the generate-selectors tool to create XPath selectors, they will automatically be generated with the "xpath=" prefix, making them ready for direct use in your workflows without requiring manual conversion.
+
+For example, a generated XPath selector might look like: `"xpath": "xpath=//div[@class='button']"`
 
 ### JavaScript Execution
 

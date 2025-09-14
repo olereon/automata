@@ -172,11 +172,26 @@ echo "<div class='container'><button id='submit'>Submit</button></div>" | automa
 
 #### New Targeting Modes
 
-The tool now supports three targeting modes:
+The tool now supports three targeting modes that determine which elements in the HTML fragment will have selectors generated:
 
 1. **"all"** (default): Generate selectors for all elements in the fragment
+   - This mode processes every HTML element in the provided fragment
+   - Useful when you want to see all possible selectors for your HTML structure
+   - Can generate a large number of selectors for complex fragments
+
 2. **"selector"**: Generate selectors for elements matching a specific selector
+   - This mode only processes elements that match the custom selector you provide
+   - Ideal when you're interested in specific elements and want to ignore others
+   - Requires the `--custom-selector` parameter to specify which elements to target
+   - Supports both CSS and XPath selectors (specified with `--selector-type`)
+
 3. **"auto"**: Automatically detect important elements
+   - This mode intelligently identifies elements that are likely to be important for automation
+   - Looks for elements with specific characteristics:
+     - Interactive elements (buttons, inputs, links, etc.)
+     - Elements with IDs
+     - Elements with test attributes (data-testid, data-test, data-cy, data-qa)
+   - Useful for quickly finding the most relevant elements without specifying them manually
 
 ```bash
 # Generate selectors for all elements (default)
@@ -198,7 +213,127 @@ You can now specify the type of selectors to generate:
 automata helper generate-selectors --html-fragment "<div><button>Click</button></div>" --selector-type css
 
 # Generate XPath selectors
+Note: When generating XPath selectors, they will automatically include the "xpath=" prefix to ensure they are in the correct format for direct use in workflows without requiring manual conversion. For example, a generated XPath selector will look like: `"xpath": "xpath=//div[@class='button']"`
 automata helper generate-selectors --html-fragment "<div><button>Click</button></div>" --selector-type xpath
+```
+
+#### Detailed Examples for Each Targeting Mode
+
+##### 1. "all" Targeting Mode Examples
+
+The "all" mode generates selectors for every element in the HTML fragment:
+
+```bash
+# Basic example with simple HTML
+automata helper generate-selectors --html-fragment "<div><button>Click</button></div>" --targeting-mode all
+
+# More complex example with multiple elements
+automata helper generate-selectors --html-fragment "
+<div class='container'>
+  <h1>Form Title</h1>
+  <form id='login-form'>
+    <input type='text' name='username' placeholder='Username'>
+    <input type='password' name='password' placeholder='Password'>
+    <button type='submit'>Login</button>
+  </form>
+</div>" --targeting-mode all
+```
+
+##### 2. "selector" Targeting Mode Examples
+
+The "selector" mode is useful when you want to focus on specific elements:
+
+```bash
+# Target all buttons
+automata helper generate-selectors --html-fragment "<div><button>Click</button><a>Link</a></div>" --targeting-mode selector --custom-selector "button"
+
+# Target elements with specific classes
+automata helper generate-selectors --html-fragment "<div><button class='primary'>Submit</button><button class='secondary'>Cancel</button></div>" --targeting-mode selector --custom-selector ".primary"
+
+# Target elements with specific text content using XPath
+automata helper generate-selectors --html-fragment "<div><button>Submit</button><button>Cancel</button></div>" --targeting-mode selector --custom-selector "//button[contains(text(), 'Submit')]" --selector-type xpath
+
+# Target elements by ID
+automata helper generate-selectors --html-fragment "<div><input id='username'><input id='password'></div>" --targeting-mode selector --custom-selector "#username"
+```
+
+##### 3. "auto" Targeting Mode Examples
+
+The "auto" mode intelligently identifies important elements:
+
+```bash
+# Simple form example
+automata helper generate-selectors --html-fragment "
+<div>
+  <h1>Login Form</h1>
+  <form>
+    <input type='text' name='username' placeholder='Username'>
+    <input type='password' name='password' placeholder='Password'>
+    <button type='submit'>Login</button>
+  </form>
+</div>" --targeting-mode auto
+
+# Example with test attributes
+automata helper generate-selectors --html-fragment "
+<div>
+  <h1>Dashboard</h1>
+  <nav>
+    <a href='/home' data-testid='home-link'>Home</a>
+    <a href='/profile' data-testid='profile-link'>Profile</a>
+  </nav>
+  <button data-cy='logout-button'>Logout</button>
+</div>" --targeting-mode auto
+```
+
+#### Working with Text Content
+
+The selector generator can create selectors that include text content, which is helpful for distinguishing between elements with similar structures but different text:
+
+```bash
+# Generate selectors for elements with specific text using XPath
+automata helper generate-selectors --html-fragment "
+<div>
+  <button>Save Changes</button>
+  <button>Cancel</button>
+  <button>Delete</button>
+</div>" --targeting-mode selector --custom-selector "//button[contains(text(), 'Save')]" --selector-type xpath
+
+# Generate text-based selectors for all elements (includes :contains selectors)
+automata helper generate-selectors --html-fragment "
+<div>
+  <a href='/home'>Home Page</a>
+  <a href='/about'>About Us</a>
+  <a href='/contact'>Contact Information</a>
+</div>" --targeting-mode all
+
+# Example with similar elements distinguished by text
+automata helper generate-selectors --html-fragment "
+<div class='actions'>
+  <button class='btn'>Submit Form</button>
+  <button class='btn'>Reset Form</button>
+</div>" --targeting-mode selector --custom-selector "//button[contains(text(), 'Submit')]" --selector-type xpath
+```
+
+#### Understanding --custom-selector and --selector-type Parameters
+
+The `--custom-selector` and `--selector-type` parameters provide fine-grained control over element selection:
+
+- **--custom-selector**: Specifies which elements to target when using `--targeting-mode selector`
+  - Can be any valid CSS selector or XPath expression
+  - Required when using `--targeting-mode selector`
+  - Examples: `"button"`, `".primary"`, `"#submit-btn"`, `"//input[@type='text']"`
+
+- **--selector-type**: Specifies the type of selector provided in `--custom-selector`
+  - Values: `css` (default) or `xpath`
+  - Determines how the custom selector is interpreted
+  - Examples: `--selector-type css`, `--selector-type xpath`
+
+```bash
+# CSS selector example
+automata helper generate-selectors --html-fragment "<div><button class='submit-btn'>Submit</button></div>" --targeting-mode selector --custom-selector ".submit-btn" --selector-type css
+
+# XPath selector example
+automata helper generate-selectors --html-fragment "<div><button class='submit-btn'>Submit</button></div>" --targeting-mode selector --custom-selector "//button[contains(@class, 'submit-btn')]" --selector-type xpath
 ```
 
 #### Combined Examples
@@ -214,6 +349,18 @@ automata helper generate-selectors --fragment-file path/to/fragment.html --selec
 
 # Auto-detect important elements from piped HTML and save to file
 echo "<div class='container'><button id='submit'>Submit</button></div>" | automata helper generate-selectors --stdin --targeting-mode auto --output selectors.json
+
+# Complex example with text-based targeting
+automata helper generate-selectors --html-fragment "
+<div class='form-container'>
+  <h2>User Registration</h2>
+  <form id='registration-form'>
+    <input type='text' name='email' placeholder='Email Address'>
+    <input type='password' name='password' placeholder='Create Password'>
+    <button type='submit'>Create Account</button>
+    <a href='/login'>Already have an account?</a>
+  </form>
+</div>" --targeting-mode selector --custom-selector "//button[contains(text(), 'Create Account')]" --selector-type xpath --output registration_selectors.json
 ```
 
 ### Programmatic Usage
@@ -293,6 +440,172 @@ automata helper generate-selectors page.html --output selectors.json
 ```
 
 This will save the generated selectors to a JSON file that you can reference in your workflows.
+
+#### Troubleshooting Common Issues
+
+This section addresses common issues users might face when using the generate-selectors tool with different targeting modes.
+
+##### Issue: No selectors generated when using "selector" targeting mode
+
+**Problem**: When using `--targeting-mode selector`, no selectors are generated.
+
+**Possible Causes**:
+1. The custom selector doesn't match any elements in the HTML fragment
+2. The custom selector syntax is invalid
+3. The selector type doesn't match the selector syntax
+
+**Solutions**:
+1. Verify your selector matches elements in the HTML:
+   ```bash
+   # First try with "all" mode to see all available elements
+   automata helper generate-selectors --html-fragment "<div><button>Click</button></div>" --targeting-mode all
+   
+   # Then use a selector that matches one of those elements
+   automata helper generate-selectors --html-fragment "<div><button>Click</button></div>" --targeting-mode selector --custom-selector "button"
+   ```
+
+2. Check your selector syntax:
+   ```bash
+   # For CSS selectors, ensure you're using valid CSS syntax
+   automata helper generate-selectors --html-fragment "<div><button class='btn'>Click</button></div>" --targeting-mode selector --custom-selector ".btn" --selector-type css
+   
+   # For XPath selectors, ensure you're using valid XPath syntax
+   automata helper generate-selectors --html-fragment "<div><button class='btn'>Click</button></div>" --targeting-mode selector --custom-selector "//button[contains(@class, 'btn')]" --selector-type xpath
+   ```
+
+3. Make sure the selector type matches the selector:
+   ```bash
+   # Correct: CSS selector with CSS type
+   automata helper generate-selectors --html-fragment "<div><button>Click</button></div>" --targeting-mode selector --custom-selector "button" --selector-type css
+   
+   # Correct: XPath selector with XPath type
+   automata helper generate-selectors --html-fragment "<div><button>Click</button></div>" --targeting-mode selector --custom-selector "//button" --selector-type xpath
+   ```
+
+##### Issue: Too many selectors generated when using "all" targeting mode
+
+**Problem**: When using `--targeting-mode all`, too many selectors are generated, making it difficult to find the ones you need.
+
+**Solution**: Use a more specific targeting mode or filter the results:
+
+```bash
+# Instead of "all" mode, use "selector" mode to focus on specific elements
+automata helper generate-selectors --html-fragment "<div><p>Text</p><button>Click</button></div>" --targeting-mode selector --custom-selector "button"
+
+# Or use "auto" mode to focus on important elements
+automata helper generate-selectors --html-fragment "<div><p>Text</p><button>Click</button></div>" --targeting-mode auto
+```
+
+##### Issue: Selectors don't match elements with specific text content
+
+**Problem**: When trying to generate selectors for elements with specific text content, the selectors don't work as expected.
+
+**Solution**: Use XPath with text-based predicates for more precise matching:
+
+```bash
+# For exact text match
+automata helper generate-selectors --html-fragment "<div><button>Submit</button><button>Cancel</button></div>" --targeting-mode selector --custom-selector "//button[text()='Submit']" --selector-type xpath
+
+# For partial text match (contains)
+automata helper generate-selectors --html-fragment "<div><button>Submit Form</button><button>Cancel</button></div>" --targeting-mode selector --custom-selector "//button[contains(text(), 'Submit')]" --selector-type xpath
+
+# For case-insensitive match
+automata helper generate-selectors --html-fragment "<div><button>SUBMIT</button></div>" --targeting-mode selector --custom-selector "//button[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'submit')]" --selector-type xpath
+```
+
+##### Issue: Invalid HTML fragment errors
+
+**Problem**: The tool reports errors when processing HTML fragments.
+
+**Solution**: Ensure your HTML fragment is well-formed:
+
+```bash
+# Valid HTML fragment with proper tag structure
+automata helper generate-selectors --html-fragment "<div><p>Text</p></div>" --targeting-mode all
+
+# Invalid - missing closing tag
+# automata helper generate-selectors --html-fragment "<div><p>Text" --targeting-mode all
+
+# Invalid - unescaped quotes in attributes
+# automata helper generate-selectors --html-fragment "<div class='test' attr='with "quotes"'>Text</div>" --targeting-mode all
+```
+
+##### Issue: Selectors are not robust enough
+
+**Problem**: The generated selectors are too fragile and break when the page structure changes slightly.
+
+**Solution**: Use more specific selectors or combine multiple attributes:
+
+```bash
+# Instead of simple tag selectors
+automata helper generate-selectors --html-fragment "<div><button>Click</button></div>" --targeting-mode selector --custom-selector "button"
+
+# Use more specific selectors with IDs or classes
+automata helper generate-selectors --html-fragment "<div><button id='submit-btn' class='primary'>Click</button></div>" --targeting-mode selector --custom-selector "#submit-btn"
+
+# Or use XPath with multiple conditions
+automata helper generate-selectors --html-fragment "<div><button id='submit-btn' class='primary'>Click</button></div>" --targeting-mode selector --custom-selector "//button[@id='submit-btn' and contains(@class, 'primary')]" --selector-type xpath
+```
+
+##### Issue: Understanding the output format
+
+**Problem**: The JSON output format is confusing or difficult to understand.
+
+**Solution**: Here's a breakdown of the output format:
+
+```json
+{
+  "element_0": {
+    "selectors": {
+      "xpath": "xpath=//button",
+      "css": "button",
+      "id": "",
+      "name": "",
+      "text": ":contains('Click')",
+      "attribute": "",
+      "combined": "button"
+    },
+    "element_tag": "button",
+    "element_text": "Click"
+  }
+}
+```
+
+- Each element is assigned a unique key (e.g., "element_0")
+- The "selectors" object contains different types of selectors for the element
+- "element_tag" shows the HTML tag name
+- "element_text" shows a preview of the element's text content (truncated to 50 characters)
+
+##### Issue: Selectors with special characters don't work
+
+**Problem**: Selectors containing special characters (quotes, brackets, etc.) don't work correctly.
+
+**Solution**: Properly escape special characters in your selectors:
+
+```bash
+# For CSS selectors with special characters
+automata helper generate-selectors --html-fragment "<div><button class='btn btn-primary'>Click</button></div>" --targeting-mode selector --custom-selector ".btn.btn-primary" --selector-type css
+
+# For XPath selectors with quotes
+automata helper generate-selectors --html-fragment "<div><button title='Click \"Here\"'>Click</button></div>" --targeting-mode selector --custom-selector "//button[@title=\"Click 'Here'\"]" --selector-type xpath
+```
+
+##### Issue: Performance problems with large HTML fragments
+
+**Problem**: The tool is slow or uses too much memory with large HTML fragments.
+
+**Solution**: Use more specific targeting modes to reduce the number of processed elements:
+
+```bash
+# Instead of processing all elements in a large fragment
+# automata helper generate-selectors --html-fragment "$(cat large_page.html)" --targeting-mode all
+
+# Use "selector" mode to focus only on relevant elements
+automata helper generate-selectors --html-fragment "$(cat large_page.html)" --targeting-mode selector --custom-selector "button, input, select, a"
+
+# Or use "auto" mode to focus on important elements
+automata helper generate-selectors --html-fragment "$(cat large_page.html)" --targeting-mode auto
+```
 
 ## Action Builder
 

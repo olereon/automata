@@ -122,12 +122,12 @@ class SelectorGenerator:
                     break
             
             # Join path segments
-            xpath = "/" + "/".join(path)
+            xpath = "//" + "/".join(path)
             
             # Try to make it more specific with attributes
             specific_xpath = self._make_xpath_more_specific(element, xpath)
             
-            return specific_xpath
+            return f"xpath={specific_xpath}"
         
         except Exception as e:
             logger.warning(f"Error generating XPath: {e}")
@@ -582,6 +582,73 @@ class SelectorGenerator:
         except Exception as e:
             logger.error(f"Error generating selectors from file: {e}")
             raise AutomationError(f"Error generating selectors from file: {e}")
+
+    def generate_from_file(self, file_path: str) -> Dict[str, str]:
+        """
+        Generate selectors for elements from an HTML file (legacy mode).
+
+        Args:
+            file_path: Path to the HTML file
+
+        Returns:
+            Dictionary with different types of selectors
+        """
+        logger.info(f"Generating selectors from HTML file (legacy mode): {file_path}")
+        
+        try:
+            # Read HTML file
+            with open(file_path, "r", encoding="utf-8") as f:
+                html_content = f.read()
+            
+            # Parse HTML
+            parsed_html = html.fromstring(html_content)
+            
+            # Find important elements
+            important_elements = []
+            
+            # Find elements with important tags
+            for tag in self.important_elements:
+                elements = parsed_html.xpath(f"//{tag}")
+                important_elements.extend(elements)
+            
+            # Find elements with IDs
+            id_elements = parsed_html.xpath("//*[@id]")
+            important_elements.extend(id_elements)
+            
+            # Remove duplicates while preserving order
+            seen = set()
+            unique_elements = []
+            for element in important_elements:
+                if element not in seen:
+                    seen.add(element)
+                    unique_elements.append(element)
+            
+            # Generate selectors for each important element
+            all_selectors = {}
+            for element in unique_elements:
+                element_selectors = {
+                    "xpath": self._generate_xpath(element),
+                    "css": self._generate_css_selector(element),
+                    "id": self._generate_id_selector(element),
+                    "name": self._generate_name_selector(element),
+                    "text": self._generate_text_selector(element),
+                    "attribute": self._generate_attribute_selector(element),
+                    "combined": self._generate_combined_selector(element)
+                }
+                
+                # Filter out empty selectors
+                element_selectors = {k: v for k, v in element_selectors.items() if v}
+                
+                # Add to all selectors
+                all_selectors.update(element_selectors)
+            
+            logger.info(f"Generated {len(all_selectors)} selectors from file (legacy mode): {file_path}")
+            return all_selectors
+        
+        except Exception as e:
+            logger.error(f"Error generating selectors from file (legacy mode): {e}")
+            raise AutomationError(f"Error generating selectors from file: {e}")
+
 
     def save_selectors(self, selectors: Dict[str, str], output_path: str) -> None:
         """
