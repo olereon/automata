@@ -66,17 +66,29 @@ class VariableManager:
             Variable value or default
         """
         try:
+            # DEBUG: Log variable access attempt
+            logger.debug(f"VARIABLE_ACCESS: Attempting to get variable '{name}'")
+            
+            # List all available variables for debugging
+            available_vars = list(self.variables.keys())
+            logger.debug(f"VARIABLE_ACCESS: Available variables in memory: {available_vars}")
+            
             # Try to get from memory
             if name in self.variables:
-                return self.variables[name]
+                value = self.variables[name]
+                logger.debug(f"VARIABLE_ACCESS: Found '{name}' in memory with value: '{value}'")
+                return value
             
             # Try to load from disk
+            logger.debug(f"VARIABLE_ACCESS: Variable '{name}' not in memory, trying to load from disk")
             value = self._load_variable(name)
             if value is not None:
                 self.variables[name] = value
+                logger.debug(f"VARIABLE_ACCESS: Loaded '{name}' from disk with value: '{value}'")
                 return value
             
             # Return default
+            logger.debug(f"VARIABLE_ACCESS: Variable '{name}' not found, returning default: '{default}'")
             return default
         
         except Exception as e:
@@ -158,6 +170,12 @@ class VariableManager:
             logger.error(f"Error clearing variables: {e}")
             raise AutomationError(f"Error clearing variables: {e}")
 
+    def clear(self) -> None:
+        """
+        Clear all variables. Alias for clear_variables().
+        """
+        self.clear_variables()
+
     def substitute_variables(self, text: str) -> str:
         """
         Substitute variables in a text string.
@@ -169,16 +187,26 @@ class VariableManager:
             Text with variables substituted
         """
         try:
+            # DEBUG: Log the substitution attempt
+            logger.debug(f"VARIABLE_SUBSTITUTION: Attempting to substitute variables in text: '{text}'")
+            
             # Match ${variable} or $variable patterns
             pattern = r'\$\{?([a-zA-Z_][a-zA-Z0-9_]*)\}?'
             
             def replace_match(match):
                 var_name = match.group(1)
+                # DEBUG: Log each variable lookup
+                logger.debug(f"VARIABLE_SUBSTITUTION: Looking up variable '{var_name}'")
                 var_value = self.get_variable(var_name, "")
+                # DEBUG: Log the value found
+                logger.debug(f"VARIABLE_SUBSTITUTION: Variable '{var_name}' = '{var_value}' (type: {type(var_value)})")
                 return str(var_value)
             
             # Replace all matches
             result = re.sub(pattern, replace_match, text)
+            
+            # DEBUG: Log the final result
+            logger.debug(f"VARIABLE_SUBSTITUTION: Final result: '{result}'")
             
             return result
         
@@ -543,6 +571,16 @@ class VariableManager:
         except Exception as e:
             logger.error(f"Error bulk setting variables: {e}")
             raise AutomationError(f"Error bulk setting variables: {e}")
+
+    def set_variables(self, variables: Dict[str, Any], persist: bool = False) -> None:
+        """
+        Set multiple variables at once. Alias for bulk_set_variables().
+
+        Args:
+            variables: Dictionary of variable names and values
+            persist: Whether to persist the variables to disk
+        """
+        self.bulk_set_variables(variables, persist)
 
     def bulk_get_variables(self, names: List[str]) -> Dict[str, Any]:
         """

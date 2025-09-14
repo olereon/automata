@@ -687,3 +687,186 @@ class HTMLParser:
         except Exception as e:
             logger.warning(f"Error extracting title: {e}")
             return ""
+
+    async def click_element(self, page: Page, selector: str) -> None:
+        """
+        Click on an element.
+
+        Args:
+            page: Playwright Page object
+            selector: CSS selector or XPath for the element
+        """
+        try:
+            # Check if selector is XPath
+            if selector.startswith("xpath="):
+                xpath = selector[6:]  # Remove "xpath=" prefix
+                element = await page.wait_for_selector(xpath, state="visible")
+                await element.click()
+            else:
+                # Treat as CSS selector
+                element = await page.wait_for_selector(selector, state="visible")
+                await element.click()
+            
+            logger.info(f"Clicked element with selector: {selector}")
+        
+        except Exception as e:
+            logger.error(f"Error clicking element with selector {selector}: {e}")
+            raise AutomationError(f"Error clicking element with selector {selector}: {e}")
+
+    async def type_text(self, page: Page, selector: str, text: str) -> None:
+        """
+        Type text into an input field.
+
+        Args:
+            page: Playwright Page object
+            selector: CSS selector or XPath for the element
+            text: Text to type
+        """
+        try:
+            # Check if selector is XPath
+            if selector.startswith("xpath="):
+                xpath = selector[6:]  # Remove "xpath=" prefix
+                element = await page.wait_for_selector(xpath, state="visible")
+                await element.fill(text)
+            else:
+                # Treat as CSS selector
+                element = await page.wait_for_selector(selector, state="visible")
+                await element.fill(text)
+            
+            logger.info(f"Typed text into element with selector: {selector}")
+        
+        except Exception as e:
+            logger.error(f"Error typing text into element with selector {selector}: {e}")
+            raise AutomationError(f"Error typing text into element with selector {selector}: {e}")
+
+    async def hover_element(self, page: Page, selector: str) -> None:
+        """
+        Hover over an element.
+
+        Args:
+            page: Playwright Page object
+            selector: CSS selector or XPath for the element
+        """
+        try:
+            # Check if selector is XPath
+            if selector.startswith("xpath="):
+                xpath = selector[6:]  # Remove "xpath=" prefix
+                element = await page.wait_for_selector(xpath, state="visible")
+                await element.hover()
+            else:
+                # Treat as CSS selector
+                element = await page.wait_for_selector(selector, state="visible")
+                await element.hover()
+            
+            logger.info(f"Hovered over element with selector: {selector}")
+        
+        except Exception as e:
+            logger.error(f"Error hovering over element with selector {selector}: {e}")
+            raise AutomationError(f"Error hovering over element with selector {selector}: {e}")
+
+    async def get_text(self, page: Page, selector: str) -> str:
+        """
+        Get text content of an element.
+
+        Args:
+            page: Playwright Page object
+            selector: CSS selector or XPath for the element
+
+        Returns:
+            Text content of the element
+        """
+        try:
+            # Check if selector is XPath
+            if selector.startswith("xpath="):
+                xpath = selector[6:]  # Remove "xpath=" prefix
+                element = await page.wait_for_selector(xpath, state="visible")
+                text = await element.text_content()
+            else:
+                # Treat as CSS selector
+                element = await page.wait_for_selector(selector, state="visible")
+                text = await element.text_content()
+            
+            logger.info(f"Got text from element with selector: {selector}")
+            return text or ""
+        
+        except Exception as e:
+            logger.error(f"Error getting text from element with selector {selector}: {e}")
+            raise AutomationError(f"Error getting text from element with selector {selector}: {e}")
+
+    async def get_attribute(self, page: Page, selector: str, attribute: str) -> str:
+        """
+        Get attribute value of an element.
+
+        Args:
+            page: Playwright Page object
+            selector: CSS selector or XPath for the element
+            attribute: Name of the attribute
+
+        Returns:
+            Attribute value of the element
+        """
+        try:
+            # Check if selector is XPath
+            if selector.startswith("xpath="):
+                xpath = selector[6:]  # Remove "xpath=" prefix
+                element = await page.wait_for_selector(xpath, state="visible")
+                attr_value = await element.get_attribute(attribute)
+            else:
+                # Treat as CSS selector
+                element = await page.wait_for_selector(selector, state="visible")
+                attr_value = await element.get_attribute(attribute)
+            
+            logger.info(f"Got attribute '{attribute}' from element with selector: {selector}")
+            return attr_value or ""
+        
+        except Exception as e:
+            logger.error(f"Error getting attribute '{attribute}' from element with selector {selector}: {e}")
+            raise AutomationError(f"Error getting attribute '{attribute}' from element with selector {selector}: {e}")
+
+    async def extract_data(self, page: Page, selector: str, config: Dict[str, Any]) -> Any:
+        """
+        Extract data from elements matching a selector.
+
+        Args:
+            page: Playwright Page object
+            selector: CSS selector or XPath for the elements
+            config: Configuration for data extraction
+
+        Returns:
+            Extracted data
+        """
+        try:
+            # Get elements matching selector
+            if selector.startswith("xpath="):
+                xpath = selector[6:]  # Remove "xpath=" prefix
+                elements = await page.query_selector_all(xpath)
+            else:
+                # Treat as CSS selector
+                elements = await page.query_selector_all(selector)
+            
+            # Extract data based on config
+            extract_type = config.get("type", "text")
+            result = []
+            
+            for element in elements:
+                if extract_type == "text":
+                    text = await element.text_content()
+                    result.append(text or "")
+                elif extract_type == "attribute":
+                    attr_name = config.get("attribute", "")
+                    attr_value = await element.get_attribute(attr_name)
+                    result.append(attr_value or "")
+                elif extract_type == "html":
+                    html_content = await element.inner_html()
+                    result.append(html_content or "")
+            
+            # If only one element was expected and config specifies single, return just that item
+            if config.get("single", False) and len(result) > 0:
+                return result[0]
+            
+            logger.info(f"Extracted {len(result)} items with selector: {selector}")
+            return result
+        
+        except Exception as e:
+            logger.error(f"Error extracting data with selector {selector}: {e}")
+            raise AutomationError(f"Error extracting data with selector {selector}: {e}")

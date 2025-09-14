@@ -7,9 +7,16 @@ import json
 import logging
 import os
 import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Optional
+
 import click
 from click import echo, style, prompt, confirm
+
 from ..core.logger import get_logger
+from ..core.browser import BrowserManager
+from ..core.session_manager import SessionManager
 from ..workflow import (
     WorkflowBuilder,
     WorkflowValidator,
@@ -19,7 +26,8 @@ from ..workflow import (
 from ..tools import (
     HTMLParser,
     SelectorGenerator,
-    ActionBuilder
+    ActionBuilder,
+    BrowserExplorer
 )
 
 logger = get_logger(__name__)
@@ -81,70 +89,14 @@ def create(ctx, output):
 @workflow.command()
 @click.argument('file_path', type=click.Path(exists=True))
 @click.option('--credentials', type=click.Path(exists=True), help='Path to JSON credentials file')
+@click.option('--session', help='Session ID to restore')
+@click.option('--headless', is_flag=True, default=True, help='Run browser in headless mode (default: True)')
+@click.option('--visible', is_flag=True, help='Run browser in visible mode (overrides --headless)')
+@click.option('--save-session', help='Save session with this ID after execution')
 @click.pass_context
-def execute(ctx, file_path, credentials):
+def execute(ctx, file_path, credentials, session, headless, visible, save_session):
     """Execute a workflow from a file."""
-    try:
-        # Initialize workflow execution engine
-        engine = WorkflowExecutionEngine()
-        
-        # Load credentials if provided
-        if credentials:
-            from ..auth.config import AuthenticationConfig
-            
-            # Initialize authentication config
-            auth_config = AuthenticationConfig()
-            
-            # Authenticate using credentials JSON file
-            result = asyncio.run(auth_config.authenticate(
-                method="credentials_json",
-                path=credentials
-            ))
-            
-            if not result.get("success", False):
-                echo(style(f"Error loading credentials: {result.get('error', 'Unknown error')}", fg="red"))
-                sys.exit(1)
-            
-            # Extract credentials and config from session data
-            session_data = result.get("session_data", {})
-            credentials_data = session_data.get("credentials", {})
-            config_data = session_data.get("config", {})
-            custom_fields = session_data.get("custom_fields", {})
-            
-            # Inject credentials into variable manager
-            engine.variable_manager.bulk_set_variables(credentials_data)
-            engine.variable_manager.bulk_set_variables(config_data)
-            engine.variable_manager.bulk_set_variables(custom_fields)
-            
-            echo(style(f"Credentials loaded from: {credentials}", fg="green"))
-        
-        # Load workflow
-        builder = WorkflowBuilder()
-        workflow = builder.load_workflow(file_path)
-        
-        # Execute workflow
-        results = asyncio.run(engine.execute_workflow(workflow))
-        
-        # Print results
-        echo(style(f"Workflow executed successfully with {len(results)} steps", fg="green"))
-        
-        # Print execution summary
-        completed = sum(1 for r in results if r.get("status") == "completed")
-        failed = sum(1 for r in results if r.get("status") == "failed")
-        skipped = sum(1 for r in results if r.get("status") == "skipped")
-        
-        echo(f"Completed: {completed}, Failed: {failed}, Skipped: {skipped}")
-        
-        # Print failed steps if any
-        if failed > 0:
-            echo(style("\nFailed steps:", fg="red"))
-            for result in results:
-                if result.get("status") == "failed":
-                    echo(f"  - {result.get('step_name')}: {result.get('error')}")
-    
-    except Exception as e:
-        echo(style(f"Error executing workflow: {e}", fg="red"))
-        sys.exit(1)
+    asyncio.run(execute_async(ctx, file_path, credentials, session, headless, visible, save_session))
 
 
 @workflow.command()
@@ -505,6 +457,258 @@ def build_action(ctx):
     
     except Exception as e:
         echo(style(f"Error building action: {e}", fg="red"))
+        sys.exit(1)
+
+
+@cli.group()
+def browser():
+    """Browser exploration and session management commands."""
+    pass
+
+
+@browser.command()
+@click.option('--headless/--visible', default=False, help='Run browser in headless mode (default: visible)')
+@click.pass_context
+def explore(ctx, headless):
+    """Start an interactive browser exploration session."""
+    try:
+        # Initialize browser explorer
+        explorer = BrowserExplorer(headless=not headless)
+        
+        # Start the browser
+        asyncio.run(explorer.start())
+        
+        # Run interactive session
+        asyncio.run(explorer.run_interactive())
+        
+        # Stop the browser
+        asyncio.run(explorer.stop())
+        
+        echo(style("Browser exploration session ended", fg="green"))
+    
+    except KeyboardInterrupt:
+        echo(style("\nBrowser exploration session interrupted", fg="yellow"))
+        try:
+            asyncio.run(explorer.stop())
+        except:
+            pass
+    except Exception as e:
+        echo(style(f"Error in browser exploration: {e}", fg="red"))
+        sys.exit(1)
+
+
+@cli.group()
+def session():
+    """Session management commands."""
+    pass
+
+
+@session.command()
+@click.argument('session_id')
+@click.option('--headless/--visible', default=True, help='Run browser in headless mode (default: headless)')
+@click.option('--url', help='URL to navigate to before saving session')
+@click.option('--expiry', type=int, help='Number of days until session expires (default: 30)')
+@click.option('--encryption-key', help='Key for encrypting session data')
+@click.pass_context
+def save(ctx, session_id, headless, url, expiry, encryption_key):
+    """Save a browser session."""
+    try:
+        # Initialize browser manager and session manager
+        browser_manager = BrowserManager(headless=headless)
+        session_manager = SessionManager(encryption_key=encryption_key)
+        
+        # Start the browser
+        asyncio.run(browser_manager.start())
+        
+        # Create a new page and navigate to URL if provided
+        if url:
+            asyncio.run(browser_manager.new_page(url))
+        
+        # Save the session
+        session_path = asyncio.run(session_manager.save_session(
+            browser_manager, session_id, expiry_days=expiry
+        ))
+        
+        # Stop the browser
+        asyncio.run(browser_manager.stop())
+        
+        echo(style(f"Session saved to: {session_path}", fg="green"))
+    
+    except Exception as e:
+        echo(style(f"Error saving session: {e}", fg="red"))
+        sys.exit(1)
+
+
+@session.command()
+@click.argument('session_id')
+@click.option('--headless/--visible', default=True, help='Run browser in headless mode (default: headless)')
+@click.option('--url', help='URL to navigate to after loading session')
+@click.option('--encryption-key', help='Key for decrypting session data')
+@click.pass_context
+def restore(ctx, session_id, headless, url, encryption_key):
+    """Restore a browser session."""
+    try:
+        # Initialize browser manager and session manager
+        browser_manager = BrowserManager(headless=headless)
+        session_manager = SessionManager(encryption_key=encryption_key)
+        
+        # Start the browser
+        asyncio.run(browser_manager.start())
+        
+        # Load the session
+        session_loaded = asyncio.run(session_manager.load_session(browser_manager, session_id))
+        
+        if not session_loaded:
+            echo(style(f"Failed to load session: {session_id}", fg="red"))
+            asyncio.run(browser_manager.stop())
+            sys.exit(1)
+        
+        # Create a new page and navigate to URL if provided
+        if url:
+            asyncio.run(browser_manager.new_page(url))
+        
+        # Stop the browser
+        asyncio.run(browser_manager.stop())
+        
+        echo(style(f"Session restored successfully: {session_id}", fg="green"))
+    
+    except Exception as e:
+        echo(style(f"Error restoring session: {e}", fg="red"))
+        sys.exit(1)
+
+
+@session.command()
+@click.option('--include-expired', is_flag=True, help='Include expired sessions in the list')
+@click.option('--encryption-key', help='Key for decrypting session data')
+@click.pass_context
+def list(ctx, include_expired, encryption_key):
+    """List all saved sessions."""
+    try:
+        # Initialize session manager
+        session_manager = SessionManager(encryption_key=encryption_key)
+        
+        # List sessions
+        sessions = asyncio.run(session_manager.list_sessions(include_expired=include_expired))
+        
+        if not sessions:
+            echo("No sessions found.")
+            return
+        
+        # Print sessions
+        echo(style("Saved sessions:", fg="blue"))
+        for session in sessions:
+            created_at = datetime.fromisoformat(session['created_at']) if session.get('created_at') else None
+            created_str = created_at.strftime("%Y-%m-%d %H:%M:%S") if created_at else "Unknown"
+            
+            status = "Expired" if session.get('is_expired') else "Active"
+            status_color = "red" if session.get('is_expired') else "green"
+            
+            echo(f"  - {session['session_id']}:")
+            echo(f"    Created: {created_str}")
+            echo(f"    Status: ", nl=False)
+            echo(style(status, fg=status_color))
+            echo(f"    Cookies: {session['cookie_count']}")
+            echo(f"    Local Storage: {'Yes' if session['has_local_storage'] else 'No'}")
+            echo(f"    Session Storage: {'Yes' if session['has_session_storage'] else 'No'}")
+            echo(f"    Expires in: {session['expiry_days']} days")
+    
+    except Exception as e:
+        echo(style(f"Error listing sessions: {e}", fg="red"))
+        sys.exit(1)
+
+
+@session.command()
+@click.argument('session_id')
+@click.pass_context
+def delete(ctx, session_id):
+    """Delete a saved session."""
+    try:
+        # Initialize session manager
+        session_manager = SessionManager()
+        
+        # Confirm deletion
+        if not confirm(f"Are you sure you want to delete session '{session_id}'?"):
+            echo("Session deletion cancelled.")
+            return
+        
+        # Delete the session
+        deleted = asyncio.run(session_manager.delete_session(session_id))
+        
+        if deleted:
+            echo(style(f"Session '{session_id}' deleted", fg="green"))
+        else:
+            echo(style(f"Failed to delete session: {session_id}", fg="red"))
+    
+    except Exception as e:
+        echo(style(f"Error deleting session: {e}", fg="red"))
+        sys.exit(1)
+
+
+@session.command()
+@click.option('--encryption-key', help='Key for decrypting session data')
+@click.pass_context
+def cleanup(ctx, encryption_key):
+    """Delete all expired sessions."""
+    try:
+        # Initialize session manager
+        session_manager = SessionManager(encryption_key=encryption_key)
+        
+        # Clean up expired sessions
+        deleted_count = asyncio.run(session_manager.cleanup_expired_sessions())
+        
+        if deleted_count > 0:
+            echo(style(f"Cleaned up {deleted_count} expired sessions", fg="green"))
+        else:
+            echo("No expired sessions found.")
+    
+    except Exception as e:
+        echo(style(f"Error cleaning up expired sessions: {e}", fg="red"))
+        sys.exit(1)
+
+
+@session.command()
+@click.argument('session_id')
+@click.option('--encryption-key', help='Key for decrypting session data')
+@click.pass_context
+def info(ctx, session_id, encryption_key):
+    """Get information about a session."""
+    try:
+        # Initialize session manager
+        session_manager = SessionManager(encryption_key=encryption_key)
+        
+        # Get session info
+        session_info = asyncio.run(session_manager.get_session_info(session_id))
+        
+        if not session_info:
+            echo(style(f"Session not found: {session_id}", fg="red"))
+            return
+        
+        # Print session info
+        echo(style(f"Session information for '{session_id}':", fg="blue"))
+        
+        created_at = datetime.fromisoformat(session_info['created_at']) if session_info.get('created_at') else None
+        created_str = created_at.strftime("%Y-%m-%d %H:%M:%S") if created_at else "Unknown"
+        
+        status = "Expired" if session_info.get('is_expired') else "Active"
+        status_color = "red" if session_info.get('is_expired') else "green"
+        
+        echo(f"  Created: {created_str}")
+        echo(f"  Status: ", nl=False)
+        echo(style(status, fg=status_color))
+        echo(f"  Path: {session_info['path']}")
+        echo(f"  Cookies: {session_info['cookie_count']}")
+        echo(f"  Local Storage: {'Yes' if session_info['has_local_storage'] else 'No'}")
+        echo(f"  Session Storage: {'Yes' if session_info['has_session_storage'] else 'No'}")
+        echo(f"  Expires in: {session_info['expiry_days']} days")
+        
+        # Print metadata if available
+        if 'metadata' in session_info:
+            echo("  Metadata:")
+            for key, value in session_info['metadata'].items():
+                echo(f"    {key}: {value}")
+    
+    except Exception as e:
+        echo(style(f"Error getting session info: {e}", fg="red"))
         sys.exit(1)
 
 

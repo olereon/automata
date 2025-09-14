@@ -48,11 +48,27 @@ class AuthResult:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert result to dictionary."""
+        # Rename session data keys to avoid conflicts with Click reserved keys
+        renamed_session_data = {}
+        for key, value in self.session_data.items():
+            if key == "auth_method":
+                renamed_session_data["session_auth_method"] = value
+            elif key == "credentials_file":
+                renamed_session_data["session_credentials_file"] = value
+            elif key == "credentials":
+                renamed_session_data["session_credentials"] = value
+            elif key == "config":
+                renamed_session_data["session_config"] = value
+            elif key == "custom_fields":
+                renamed_session_data["session_custom_fields"] = value
+            else:
+                renamed_session_data[key] = value
+        
         return {
             "success": self.success,
             "message": self.message,
             "data": self.data,
-            "session_data": self.session_data
+            "session_data": renamed_session_data
         }
 
 

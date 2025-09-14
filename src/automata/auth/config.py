@@ -426,7 +426,63 @@ class AuthenticationFactory:
         Returns:
             Authentication result dictionary
         """
-        # Get enabled methods
+        # Check if a specific method is explicitly requested
+        explicit_method = kwargs.get("method")
+        
+        if explicit_method:
+            # Convert string to AuthMethod enum if needed
+            if isinstance(explicit_method, str):
+                try:
+                    explicit_method = AuthMethod(explicit_method)
+                except ValueError:
+                    error_msg = f"Invalid authentication method: {explicit_method}"
+                    logger.error(error_msg)
+                    return {"success": False, "error": error_msg}
+            
+            # Check if the explicit method is enabled
+            enabled_methods = self.config.get_enabled_methods(is_web)
+            if explicit_method not in enabled_methods:
+                error_msg = f"Authentication method is not enabled: {explicit_method.value}"
+                logger.error(error_msg)
+                return {"success": False, "error": error_msg}
+            
+            # Get method configuration
+            method_config = self.config.get_method_config(explicit_method, is_web)
+            
+            # Check if method is available
+            # Merge method_config and kwargs for availability check, but exclude 'method' from kwargs
+            kwargs_without_method = {k: v for k, v in kwargs.items() if k != 'method'}
+            availability_params = {**method_config, **kwargs_without_method}
+            if not await self.auth_manager.check_availability(explicit_method, **availability_params):
+                error_msg = f"Authentication method not available: {explicit_method.value}"
+                logger.error(error_msg)
+                return {"success": False, "error": error_msg}
+            
+            # Try to authenticate with the explicit method
+            logger.info(f"Using explicitly requested authentication method: {explicit_method.value}")
+            
+            # Merge method_config and kwargs, with kwargs taking precedence
+            merged_params = {**method_config, **kwargs}
+
+            # Remove 'method' from merged_params if it exists to avoid duplicate parameter
+            if 'method' in merged_params:
+                del merged_params['method']
+
+            result = await self.auth_manager.authenticate(explicit_method, **merged_params)
+            
+            if result.success:
+                logger.info(f"Authentication successful with method: {explicit_method.value}")
+                # Create a copy of the result dictionary
+                result_dict = result.to_dict()
+                # The session data keys have already been renamed in AuthResult.to_dict() to avoid Click conflicts
+                # So we do not need to remove them here
+                return result_dict
+            else:
+                error_msg = f"Authentication failed with method: {explicit_method.value}"
+                logger.error(error_msg)
+                return {"success": False, "error": error_msg}
+        
+        # No explicit method requested, try all enabled methods in order of priority
         methods = self.config.get_enabled_methods(is_web)
         
         if not methods:
@@ -447,14 +503,22 @@ class AuthenticationFactory:
                 continue
             
             # Try to authenticate
-            result = await self.auth_manager.authenticate(method, **method_config, **kwargs)
+            # Merge method_config and kwargs, with kwargs taking precedence
+            merged_params = {**method_config, **kwargs}
+
+            # Remove 'method' from merged_params if it exists to avoid duplicate parameter
+            if 'method' in merged_params:
+                del merged_params['method']
+
+            result = await self.auth_manager.authenticate(method, **merged_params)
             
             if result.success:
                 logger.info(f"Authentication successful with method: {method.value}")
-                return result.to_dict()
-        
-        # All methods failed
-        error_msg = "All authentication methods failed"
+                # Create a copy of the result dictionary
+                result_dict = result.to_dict()
+                # The session data keys have already been renamed in AuthResult.to_dict() to avoid Click conflicts
+                # So we do not need to remove them here
+                return result_dict
         logger.error(error_msg)
         return {"success": False, "error": error_msg}
 

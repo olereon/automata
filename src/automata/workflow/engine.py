@@ -78,6 +78,7 @@ class WorkflowExecutionEngine:
         self.is_running = False
         self.is_paused = False
         self.should_stop = False
+        self.skip_cleanup = False
         
         # Action handlers
         self.action_handlers = {
@@ -133,10 +134,37 @@ class WorkflowExecutionEngine:
             await self._setup_browser()
             
             # Set up variables
+            logger.info("WORKFLOW_SETUP: Setting up variables...")
+            
+            # Preserve credential variables before clearing
+            credential_vars = {}
+            for var_name in ["email", "password", "username", "token", "api_key"]:
+                var_value = self.variable_manager.get_variable(var_name)
+                if var_value is not None:
+                    credential_vars[var_name] = var_value
+                    logger.info(f"WORKFLOW_SETUP: Preserving credential variable '{var_name}'")
+            
+            # Clear all variables
             self.variable_manager.clear()
-            self.variable_manager.set_variables(workflow.get("variables", {}))
+            
+            # Restore credential variables
+            if credential_vars:
+                logger.info(f"WORKFLOW_SETUP: Restoring credential variables: {list(credential_vars.keys())}")
+                self.variable_manager.set_variables(credential_vars)
+            
+            # Log workflow variables
+            workflow_vars = workflow.get("variables", {})
+            logger.info(f"WORKFLOW_SETUP: Workflow variables: {workflow_vars}")
+            self.variable_manager.set_variables(workflow_vars)
+            
+            # Log additional variables
             if variables:
+                logger.info(f"WORKFLOW_SETUP: Additional variables: {variables}")
                 self.variable_manager.set_variables(variables)
+            
+            # Log all variables after setup
+            all_vars = self.variable_manager.list_variables()
+            logger.info(f"WORKFLOW_SETUP: All variables after setup: {all_vars}")
             
             # Log workflow execution start
             logger.info(f"Starting execution of workflow '{workflow['name']}' v{workflow['version']}")
@@ -291,17 +319,18 @@ class WorkflowExecutionEngine:
     async def _setup_browser(self) -> None:
         """Set up browser and page for workflow execution."""
         try:
-            # Launch browser
-            self.browser = await self.browser_manager.launch_browser()
-            
-            # Create context
-            self.context = await self.browser_manager.create_context(self.browser)
+            # Start browser and create context
+            await self.browser_manager.start()
             
             # Create page
-            self.page = await self.context.new_page()
+            self.page = await self.browser_manager.new_page()
             
             # Set default timeout
             self.page.set_default_timeout(30000)
+            
+            # Get browser and context from browser manager
+            self.browser = self.browser_manager.browser
+            self.context = self.browser_manager.context
             
             logger.info("Browser and page set up for workflow execution")
         
@@ -311,19 +340,29 @@ class WorkflowExecutionEngine:
 
     async def _cleanup(self) -> None:
         """Clean up after workflow execution."""
+        logger.info("DEBUG: Workflow engine _cleanup() called")
+        
+        # Skip cleanup if requested (e.g., for session saving)
+        if self.skip_cleanup:
+            logger.info("DEBUG: Skipping cleanup as requested")
+            return
+            
         try:
             # Close page
             if self.page:
+                logger.info("DEBUG: Closing page")
                 await self.page.close()
                 self.page = None
             
             # Close context
             if self.context:
+                logger.info("DEBUG: Closing context")
                 await self.context.close()
                 self.context = None
             
             # Close browser
             if self.browser:
+                logger.info("DEBUG: Closing browser")
                 await self.browser.close()
                 self.browser = None
             
@@ -332,6 +371,7 @@ class WorkflowExecutionEngine:
             self.is_paused = False
             self.should_stop = False
             
+            logger.info("DEBUG: Browser and page cleaned up after workflow execution")
             logger.info("Browser and page cleaned up after workflow execution")
         
         except Exception as e:
@@ -357,6 +397,59 @@ class WorkflowExecutionEngine:
         
         return None
 
+    async def cleanup_browser(self) -> None:
+        """
+        Clean up browser resources when explicitly requested.
+        This method should be called after session saving is complete.
+        """
+        logger.info("DEBUG: Workflow engine cleanup_browser() called")
+        logger.info(f"DEBUG: cleanup_browser - Initial state - page: {self.page is not None}, context: {self.context is not None}, browser: {self.browser is not None}")
+        
+        try:
+            # Close page
+            if self.page:
+                logger.info("DEBUG: cleanup_browser - Closing page...")
+                await self.page.close()
+                self.page = None
+                logger.info("DEBUG: cleanup_browser - Page closed successfully")
+            else:
+                logger.info("DEBUG: cleanup_browser - No page to close")
+            
+            # Close context
+            if self.context:
+                logger.info("DEBUG: cleanup_browser - Closing context...")
+                await self.context.close()
+                self.context = None
+                logger.info("DEBUG: cleanup_browser - Context closed successfully")
+            else:
+                logger.info("DEBUG: cleanup_browser - No context to close")
+            
+            # Close browser
+            if self.browser:
+                logger.info("DEBUG: cleanup_browser - Closing browser...")
+                await self.browser.close()
+                self.browser = None
+                logger.info("DEBUG: cleanup_browser - Browser closed successfully")
+            else:
+                logger.info("DEBUG: cleanup_browser - No browser to close")
+            
+            # Reset execution state
+            logger.info("DEBUG: cleanup_browser - Resetting execution state...")
+            self.is_running = False
+            self.is_paused = False
+            self.should_stop = False
+            logger.info("DEBUG: cleanup_browser - Execution state reset")
+            
+            logger.info("DEBUG: cleanup_browser - All browser resources cleaned up successfully")
+            logger.info("Browser resources cleaned up")
+        
+        except Exception as e:
+            logger.error(f"DEBUG: cleanup_browser - Error during cleanup: {e}")
+            logger.error(f"DEBUG: cleanup_browser - Error type: {type(e).__name__}")
+            import traceback
+            logger.error(f"DEBUG: cleanup_browser - Traceback: {traceback.format_exc()}")
+            raise
+
     # Action handlers
     async def _handle_navigate(self, step: Dict[str, Any]) -> Any:
         """
@@ -368,7 +461,7 @@ class WorkflowExecutionEngine:
         Returns:
             Action result
         """
-        url = step.get("value", "")
+        url = step.get("url", "") or step.get("value", "")
         if not url:
             raise AutomationError("URL is required for navigate action")
         
@@ -421,9 +514,19 @@ class WorkflowExecutionEngine:
         if value is None:
             raise AutomationError("Value is required for type action")
         
+        # DEBUG: Log original values before substitution
+        logger.info(f"TYPE_ACTION_DEBUG: Original selector: '{selector}', Original value: '{value}'")
+        
+        # List all available variables before substitution
+        available_vars = self.variable_manager.list_variables()
+        logger.info(f"TYPE_ACTION_DEBUG: Available variables before substitution: {available_vars}")
+        
         # Substitute variables in selector and value
         selector = self.variable_manager.substitute_variables(selector)
         value = self.variable_manager.substitute_variables(str(value))
+        
+        # DEBUG: Log values after substitution
+        logger.info(f"TYPE_ACTION_DEBUG: After substitution - selector: '{selector}', value: '{value}'")
         
         # Type value into element
         await self.html_parser.type_text(self.page, selector, value)
