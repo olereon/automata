@@ -1,7 +1,16 @@
 venv/
+logs/
 workflows/
 credentials/
 html_pages/
 __pycache__/
 .roo/commands/
 AGENTS.md
+.coverage
+*.egg-info/
+.pytest_cache/
+htmlcov/
+*.backup
+*_json_auth_testing_todo.md
+freep_add_img.json
+selectors.json
