@@ -86,6 +86,78 @@ def create(ctx, output):
         sys.exit(1)
 
 
+async def _execute_workflow(ctx, file_path, credentials, session, headless, visible, save_session):
+    """Execute a workflow from a file asynchronously."""
+    try:
+        # Initialize workflow builder and execution engine
+        builder = WorkflowBuilder()
+        engine = WorkflowExecutionEngine()
+        
+        # Load workflow from file
+        workflow = builder.load_workflow(file_path)
+        
+        # Set up browser manager with headless/visible mode
+        actual_headless = headless and not visible
+        engine.browser_manager.headless = actual_headless
+        
+        # Load credentials if provided
+        variables = {}
+        if credentials:
+            from ..auth.credentials_json import CredentialsJSON
+            auth = CredentialsJSON()
+            creds = auth.load_credentials(credentials)
+            variables.update(creds)
+        
+        # Start browser before restoring session if needed
+        if session:
+            await engine.browser_manager.start()
+            
+            from ..core.session_manager import SessionManager
+            session_manager = SessionManager()
+            session_loaded = await session_manager.load_session(engine.browser_manager, session)
+            if not session_loaded:
+                echo(style(f"Failed to load session: {session}", fg="red"))
+                await engine.browser_manager.stop()
+                sys.exit(1)
+        
+        # Execute workflow, skipping cleanup if we need to save session
+        skip_cleanup = save_session is not None
+        results = await engine.execute_workflow(workflow, variables, skip_cleanup=skip_cleanup)
+        
+        # Save session if requested
+        if save_session:
+            from ..core.session_manager import SessionManager
+            session_manager = SessionManager()
+            session_path = await session_manager.save_session(
+                engine.browser_manager, save_session
+            )
+            echo(style(f"Session saved to: {session_path}", fg="green"))
+            
+            # Clean up browser resources after session is saved
+            await engine.cleanup_browser()
+        else:
+            # Clean up browser resources
+            await engine.cleanup_browser()
+        
+        # Print execution results
+        echo(style(f"Workflow executed successfully: {workflow['name']}", fg="green"))
+        for result in results:
+            status = result.get("status", "unknown")
+            step_name = result.get("step_name", "unknown")
+            if status == "completed":
+                echo(style(f"  ✓ {step_name}", fg="green"))
+            elif status == "failed":
+                echo(style(f"  ✗ {step_name}: {result.get('error', 'Unknown error')}", fg="red"))
+            elif status == "skipped":
+                echo(style(f"  → {step_name} (skipped)", fg="yellow"))
+        
+        return results
+    
+    except Exception as e:
+        echo(style(f"Error executing workflow: {e}", fg="red"))
+        sys.exit(1)
+
+
 @workflow.command()
 @click.argument('file_path', type=click.Path(exists=True))
 @click.option('--credentials', type=click.Path(exists=True), help='Path to JSON credentials file')
@@ -96,7 +168,7 @@ def create(ctx, output):
 @click.pass_context
 def execute(ctx, file_path, credentials, session, headless, visible, save_session):
     """Execute a workflow from a file."""
-    asyncio.run(execute_async(ctx, file_path, credentials, session, headless, visible, save_session))
+    asyncio.run(_execute_workflow(ctx, file_path, credentials, session, headless, visible, save_session))
 
 
 @workflow.command()

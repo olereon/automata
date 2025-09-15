@@ -105,13 +105,14 @@ class WorkflowExecutionEngine:
             "resume": self._handle_resume
         }
 
-    async def execute_workflow(self, workflow: Dict[str, Any], variables: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    async def execute_workflow(self, workflow: Dict[str, Any], variables: Optional[Dict[str, Any]] = None, skip_cleanup: bool = False) -> List[Dict[str, Any]]:
         """
         Execute a workflow.
 
         Args:
             workflow: Workflow dictionary
             variables: Initial variables
+            skip_cleanup: If True, skip cleanup to allow session saving
 
         Returns:
             List of execution results
@@ -191,8 +192,9 @@ class WorkflowExecutionEngine:
                 else:
                     self.current_step_index += 1
             
-            # Clean up
-            await self._cleanup()
+            # Clean up unless requested to skip
+            if not skip_cleanup:
+                await self._cleanup()
             
             # Log workflow execution completion
             logger.info(f"Completed execution of workflow '{workflow['name']}' v{workflow['version']}")
@@ -201,7 +203,8 @@ class WorkflowExecutionEngine:
         
         except Exception as e:
             logger.error(f"Error executing workflow: {e}")
-            await self._cleanup()
+            if not skip_cleanup:
+                await self._cleanup()
             raise AutomationError(f"Error executing workflow: {e}")
 
     async def _execute_step(self, step: Dict[str, Any]) -> Dict[str, Any]:
