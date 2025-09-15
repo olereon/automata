@@ -14,3 +14,20 @@ htmlcov/
 *_json_auth_testing_todo.md
 freep_add_img.json
 selectors.json
+
+# Debug files
+debug_*.py
+
+# Temporary files
+*.tmp
+*.temp
+temp_*.py
+automata_run.py
+new_cli_command.py
+
+# Build artifacts
+build/
+dist/
+*.pyc
+*.pyo
+*.pyd
