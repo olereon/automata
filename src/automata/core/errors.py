@@ -469,3 +469,23 @@ class CircuitBreaker:
                 logger.warning(f"Circuit breaker opened after {self.failure_count} failures")
             
             raise e
+
+
+class XPathError(AutomationError):
+    """Base class for XPath-related errors."""
+    pass
+
+
+class XPathSyntaxError(XPathError):
+    """Raised when XPath syntax is invalid."""
+    pass
+
+
+class XPathEvaluationError(XPathError):
+    """Raised when XPath cannot be evaluated against the HTML context."""
+    pass
+
+
+class XPathUnsupportedFeatureError(XPathError):
+    """Raised when XPath uses unsupported features."""
+    pass

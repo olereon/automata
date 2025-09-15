@@ -426,10 +426,14 @@ def parse_html(ctx, file_path):
 
 
 @helper.command()
-@click.option('--file', '-f', type=click.Path(exists=True), help='Path to HTML file')
-@click.option('--html-fragment', help='Direct HTML fragment input')
-@click.option('--fragment-file', type=click.Path(exists=True), help='Path to HTML fragment file')
-@click.option('--stdin', is_flag=True, help='Read HTML fragment from stdin')
+@click.option("--file", "-f", type=click.Path(exists=True), help="Path to HTML file")
+@click.option("--html-fragment", help="Direct HTML fragment input")
+@click.option("--fragment-file", type=click.Path(exists=True), help="Path to HTML fragment file")
+@click.option("--stdin", is_flag=True, help="Read HTML fragment from stdin")
+@click.option("--xpath-expression", help="Direct XPath expression input")
+@click.option("--xpath-file", type=click.Path(exists=True), help="Path to XPath expression file")
+@click.option("--html-context", help="HTML context for XPath evaluation")
+@click.option("--html-context-file", type=click.Path(exists=True), help="Path to HTML context file")
 @click.option('--targeting-mode', type=click.Choice(['all', 'selector', 'auto']), default='auto',
               help='How to target elements: all elements, specific selector, or auto-detection')
 @click.option('--custom-selector', help='Custom selector to use when targeting-mode is "selector"')
@@ -437,18 +441,48 @@ def parse_html(ctx, file_path):
               help='Type of custom selector (css or xpath)')
 @click.option('--output', '-o', type=click.Path(), help='Output file path')
 @click.pass_context
-def generate_selectors(ctx, file, html_fragment, fragment_file, stdin, targeting_mode,
+def generate_selectors(ctx, file, html_fragment, fragment_file, stdin, xpath_expression, xpath_file, html_context, html_context_file, targeting_mode,
                       custom_selector, selector_type, output):
     """Generate selectors from HTML file or fragment."""
     try:
         # Initialize selector generator
         generator = SelectorGenerator()
         
-        # Determine input source and generate selectors
-        results = {}
-        
-        if file:
-            # Legacy mode - generate selectors from file with existing method
+        # Determine output file path first
+        if not output:
+            if file:
+                output = f"{os.path.splitext(file)[0]}_selectors.json"
+            elif fragment_file:
+                output = f"{os.path.splitext(fragment_file)[0]}_selectors.json"
+            else:
+                output = "selectors.json"        # Validate XPath input options
+        if xpath_expression or xpath_file:
+            if not html_context and not html_context_file:
+                echo(style("Error: HTML context is required when using XPath input. Use --html-context or --html-context-file", fg="red"))
+                sys.exit(1)
+            
+            # Get HTML context
+            if html_context_file:
+                try:
+                    with open(html_context_file, "r", encoding="utf-8") as f:
+                        html_context_content = f.read()
+                except Exception as e:
+                    echo(style(f"Error reading HTML context file: {e}", fg="red"))
+                    sys.exit(1)
+            else:
+                html_context_content = html_context
+            
+            # Generate selectors from XPath
+            if xpath_expression:
+                results = generator.generate_from_xpath(xpath_expression, html_context_content)
+            elif xpath_file:
+                results = generator.generate_from_xpath_file(xpath_file, html_context_content)
+            
+            # Save results to file
+            with open(output, "w", encoding="utf-8") as f:
+                json.dump(results, f, indent=2)
+        elif file:
+            # Use a simpler approach to avoid the argument parsing issue
             if custom_selector:
                 # If custom selector is provided, use element_info format
                 element_info = {}
@@ -458,59 +492,70 @@ def generate_selectors(ctx, file, html_fragment, fragment_file, stdin, targeting
                     element_info['xpath'] = custom_selector
                 
                 selectors = generator.generate_from_file(file, element_info)
-                results = {'element_0': {'selectors': selectors}}
+                # Save directly to file without storing in a variable
+                with open(output, "w", encoding="utf-8") as f:
+                    json.dump({'element_0': {'selectors': selectors, 'element_tag': 'unknown', 'element_text': ''}}, f, indent=2)
+                logger.debug(f"Used generate_from_file method")
             else:
-                # Use legacy method for backward compatibility
-                selectors = generator.generate_from_file(file)
-                results = {'element_0': {'selectors': selectors}}
+                # Use a simple approach that doesn't return complex data structures
+                selectors = generator.generate_from_file_legacy(file)
+                # Save directly to file without storing in a variable
+                with open(output, "w", encoding="utf-8") as f:
+                    json.dump({'element_0': {'selectors': selectors, 'element_tag': 'unknown', 'element_text': ''}}, f, indent=2)
+                logger.debug(f"Used generate_from_file_legacy method")
         elif html_fragment:
             # Generate selectors from HTML fragment
             results = generator.generate_from_fragment(
                 html_fragment, targeting_mode, custom_selector, selector_type
             )
+            # Save directly to file without returning the results
+            with open(output, "w", encoding="utf-8") as f:
+                json.dump(results, f, indent=2)
         elif fragment_file:
             # Generate selectors from fragment file
             results = generator.generate_from_fragment_file(
                 fragment_file, targeting_mode, custom_selector, selector_type
             )
+            # Save directly to file without returning the results
+            with open(output, "w", encoding="utf-8") as f:
+                json.dump(results, f, indent=2)
         elif stdin:
             # Generate selectors from stdin
             results = generator.generate_from_stdin(
                 targeting_mode, custom_selector, selector_type
             )
+            # Save directly to file without returning the results
+            with open(output, "w", encoding="utf-8") as f:
+                json.dump(results, f, indent=2)
         else:
             echo(style("Error: No input source specified. Use --file, --html-fragment, --fragment-file, or --stdin", fg="red"))
             sys.exit(1)
         
-        if not results:
-            echo(style("No selectors generated. Check your input and targeting options.", fg="yellow"))
-            return
-        
-        # Determine output file path
-        if not output:
-            if file:
-                output = f"{os.path.splitext(file)[0]}_selectors.json"
-            elif fragment_file:
-                output = f"{os.path.splitext(fragment_file)[0]}_selectors.json"
-            else:
-                output = "selectors.json"
-        
-        # Save results
-        with open(output, "w", encoding="utf-8") as f:
-            json.dump(results, f, indent=2)
-        
         # Print summary
         echo(style(f"Selectors generated and saved to: {output}", fg="green"))
-        echo(f"Generated selectors for {len(results)} elements:")
         
-        for element_id, element_data in results.items():
-            best_type, best_selector = generator.get_best_selector(element_data['selectors'])
-            echo(f"  - {element_id} ({element_data['element_tag']}): {best_type} = {best_selector}")
+        # Read the results back from the file for processing
+        with open(output, "r", encoding="utf-8") as f:
+            results = json.load(f)
+        
+        # Process elements
+        for i, (element_id, element_data) in enumerate(results.items()):
+            try:
+                best_type, best_selector = generator.get_best_selector(element_data['selectors'])
+                # Check if element_tag exists, provide fallback if not
+                element_tag = element_data.get('element_tag', 'unknown')
+                echo(style(f"  - Element {i+1} ({element_tag}): {best_type} = {best_selector}", fg="green"))
+            except Exception as e:
+                logger.error(f"Error processing element {element_id}: {e}")
+                echo(style(f"  - Element {i+1}: Error processing element data", fg="red"))
+        
+        # Explicitly exit to avoid any return value being interpreted as an argument
+        sys.exit(0)
     
     except Exception as e:
         echo(style(f"Error generating selectors: {e}", fg="red"))
         sys.exit(1)
-
+        sys.exit(1)
 
 @helper.command()
 @click.pass_context

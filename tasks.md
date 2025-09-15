@@ -71,3 +71,12 @@
 [ ] Implement advanced selector strategies and AI-assisted element detection
 [ ] Add plugin system for extensibility
 [ ] Develop performance optimization features
+
+## XPath Input Functionality
+[x] Design the XPath input architecture and integration points
+[x] Extend the CLI interface to support XPath input options (--xpath-expression, --xpath-file)
+[x] Design the HTML context handling for XPath evaluation
+[x] Implement XPath validation and error handling
+[x] Design the output format for XPath-based selector generation
+[x] Create a comprehensive test plan for XPath input functionality
+[x] Document the new XPath input functionality

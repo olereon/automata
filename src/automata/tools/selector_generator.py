@@ -7,7 +7,7 @@ import re
 import sys
 from typing import Dict, Any, Optional, List, Union, Tuple
 from lxml import html, etree
-from ..core.errors import AutomationError
+from ..core.errors import AutomationError, XPathError, XPathSyntaxError, XPathEvaluationError, XPathUnsupportedFeatureError
 from ..core.logger import get_logger
 
 logger = get_logger(__name__)
@@ -583,7 +583,7 @@ class SelectorGenerator:
             logger.error(f"Error generating selectors from file: {e}")
             raise AutomationError(f"Error generating selectors from file: {e}")
 
-    def generate_from_file(self, file_path: str) -> Dict[str, str]:
+    def generate_from_file_legacy(self, file_path: str) -> Dict[str, str]:
         """
         Generate selectors for elements from an HTML file (legacy mode).
 
@@ -1115,3 +1115,240 @@ class SelectorGenerator:
         except Exception as e:
             logger.error(f"Error generating selectors from stdin: {e}")
             raise AutomationError(f"Error generating selectors from stdin: {e}")
+
+    def validate_xpath(self, xpath_expression: str) -> bool:
+        """
+        Validate an XPath expression for syntax correctness.
+
+        Args:
+            xpath_expression: XPath expression to validate
+
+        Returns:
+            True if the XPath expression is valid, False otherwise
+
+        Raises:
+            XPathSyntaxError: If the XPath expression has syntax errors
+            XPathUnsupportedFeatureError: If the XPath expression uses unsupported features
+        """
+        try:
+            if not xpath_expression or not xpath_expression.strip():
+                raise XPathSyntaxError("XPath expression cannot be empty")
+
+            # Basic syntax validation
+            xpath = xpath_expression.strip()
+
+            # Check for balanced brackets and parentheses
+            if xpath.count("[") != xpath.count("]"):
+                raise XPathSyntaxError("Unbalanced brackets in XPath expression")
+            if xpath.count("(") != xpath.count(")"):
+                raise XPathSyntaxError("Unbalanced parentheses in XPath expression")
+
+            # Check for unsupported features
+            unsupported_features = [
+                # XPath axes
+                "ancestor::", "ancestor-or-self::", "attribute::", "child::",
+                "descendant::", "descendant-or-self::", "following::",
+                "following-sibling::", "namespace::", "parent::",
+                "preceding::", "preceding-sibling::", "self::",
+                # XPath functions
+                "namespace-uri(", "name(", "local-name(", "translate(",
+                "normalize-space(", "string(", "number(", "boolean(",
+                "not(", "true(", "false(", "lang(", "sum(", "floor(",
+                "ceiling(", "round(", "concat(", "starts-with(",
+                "contains(", "substring-before(", "substring-after(",
+                "substring(", "string-length(", "current()", "id("
+            ]
+
+            for feature in unsupported_features:
+                if feature in xpath:
+                    raise XPathUnsupportedFeatureError(f"Unsupported XPath feature: {feature}")
+
+            # Check for unsupported patterns
+            # Allow wildcards when they're used with predicates (conditions in square brackets)
+            if "//*" in xpath and not re.search(r"\/\/\*\[", xpath):
+                raise XPathUnsupportedFeatureError("Unsupported XPath feature: wildcard (//*) without predicates")
+            if re.search(r"\[\d+\]", xpath):
+                raise XPathUnsupportedFeatureError("Unsupported XPath feature: numeric predicate")
+            if re.search(r"\s+and\s+|\s+or\s+", xpath):
+                raise XPathUnsupportedFeatureError("Unsupported XPath feature: logical operators")
+
+            # Try to compile the XPath to validate syntax
+            try:
+                from lxml import etree
+                etree.XPath(xpath)
+            except Exception as e:
+                raise XPathSyntaxError(f"Invalid XPath syntax: {e}")
+
+            return True
+
+        except XPathError:
+            # Re-raise XPathError as-is
+            raise
+        except Exception as e:
+            logger.error(f"Error validating XPath expression: {e}")
+            raise XPathSyntaxError(f"Error validating XPath expression: {e}")
+
+    def prepare_html_context(self, html_context: str) -> str:
+        """
+        Prepare HTML context for XPath evaluation.
+
+        Args:
+            html_context: HTML context string
+
+        Returns:
+            Prepared HTML context
+
+        Raises:
+            AutomationError: If the HTML context is invalid or cannot be prepared
+        """
+        try:
+            if not html_context or not html_context.strip():
+                # Create a minimal mock HTML structure if no context is provided
+                return """<!DOCTYPE html>
+<html>
+<head>
+    <title>Mock HTML Context</title>
+</head>
+<body>
+    <div id="content">
+        <!-- User's XPath will be evaluated against this structure -->
+    </div>
+</body>
+</html>"""
+
+            # Check if it's a fragment and wrap if needed
+            if self.is_html_fragment(html_context):
+                logger.info("Detected HTML fragment context, wrapping in complete HTML structure")
+                return self.wrap_html_fragment(html_context)
+            else:
+                return html_context
+
+        except Exception as e:
+            logger.error(f"Error preparing HTML context: {e}")
+            raise AutomationError(f"Error preparing HTML context: {e}")
+
+    def generate_from_xpath(
+        self,
+        xpath_expression: str,
+        html_context: str
+    ) -> Dict[str, Any]:
+        """
+        Generate selectors for elements found using an XPath expression.
+
+        Args:
+            xpath_expression: XPath expression to evaluate
+            html_context: HTML context to evaluate the XPath against
+
+        Returns:
+            Dictionary with selectors for elements found by the XPath
+
+        Raises:
+            XPathError: If there's an error with the XPath expression or evaluation
+            AutomationError: If there's an error processing the HTML context
+        """
+        logger.info(f"Generating selectors from XPath expression: {xpath_expression}")
+
+        try:
+            # Validate XPath expression
+            self.validate_xpath(xpath_expression)
+
+            # Prepare HTML context
+            prepared_html = self.prepare_html_context(html_context)
+
+            # Parse HTML
+            try:
+                parsed_html = html.fromstring(prepared_html)
+            except Exception as parse_error:
+                raise AutomationError(f"Failed to parse HTML context: {parse_error}")
+
+            # Find elements using XPath
+            try:
+                elements = parsed_html.xpath(xpath_expression)
+            except Exception as xpath_error:
+                raise XPathEvaluationError(f"Error evaluating XPath expression: {xpath_error}")
+
+            if not elements:
+                logger.warning(f"No elements found using XPath expression: {xpath_expression}")
+                return {}
+
+            # Generate selectors for each found element
+            results = {}
+            for i, element in enumerate(elements):
+                # Create element info for this element
+                element_id = f"element_{i}"
+
+                # Generate selectors for this element
+                selectors = self._generate_selectors_for_element(element, prepared_html)
+
+                if selectors:
+                    results[element_id] = {
+                        "selectors": selectors,
+                        "element_tag": element.tag,
+                        "element_text": element.text_content().strip()[:50] if element.text_content() else "",
+                        "source_xpath": xpath_expression,
+                        "html_context": html_context[:100] + "..." if len(html_context) > 100 else html_context
+                    }
+
+            logger.info(f"Generated selectors for {len(results)} elements from XPath expression")
+            return results
+
+        except XPathError:
+            # Re-raise XPathError as-is
+            raise
+        except Exception as e:
+            logger.error(f"Error generating selectors from XPath: {e}")
+            raise AutomationError(f"Error generating selectors from XPath: {e}")
+
+    def generate_from_xpath_file(
+        self,
+        xpath_file_path: str,
+        html_context: str
+    ) -> Dict[str, Any]:
+        """
+        Generate selectors for elements found using an XPath expression from a file.
+
+        Args:
+            xpath_file_path: Path to the file containing the XPath expression
+            html_context: HTML context to evaluate the XPath against
+
+        Returns:
+            Dictionary with selectors for elements found by the XPath
+
+        Raises:
+            XPathError: If there's an error with the XPath expression or evaluation
+            AutomationError: If there's an error reading the file or processing the HTML context
+        """
+        logger.info(f"Generating selectors from XPath file: {xpath_file_path}")
+
+        try:
+            # Check if file exists
+            if not os.path.exists(xpath_file_path):
+                raise AutomationError(f"XPath file not found: {xpath_file_path}")
+
+            # Check if it's a file (not a directory)
+            if not os.path.isfile(xpath_file_path):
+                raise AutomationError(f"XPath file path is not a file: {xpath_file_path}")
+
+            # Read XPath expression from file
+            try:
+                with open(xpath_file_path, "r", encoding="utf-8") as f:
+                    xpath_expression = f.read().strip()
+            except Exception as file_error:
+                raise AutomationError(f"Error reading XPath file {xpath_file_path}: {file_error}")
+
+            # Check if file is empty
+            if not xpath_expression:
+                raise AutomationError(f"XPath file is empty: {xpath_file_path}")
+
+            # Generate selectors using the XPath expression
+            results = self.generate_from_xpath(xpath_expression, html_context)
+
+            logger.info(f"Generated selectors for {len(results)} elements from XPath file: {xpath_file_path}")
+            return results
+
+        except AutomationError:
+            # Re-raise AutomationError as-is
+            raise
+        except Exception as e:
+            logger.error(f"Error generating selectors from XPath file: {e}")
+            raise AutomationError(f"Error generating selectors from XPath file: {e}")
