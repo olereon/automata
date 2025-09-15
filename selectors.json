@@ -1,16 +1,12 @@
 {
   "element_0": {
     "selectors": {
-      "xpath": "xpath=//button[@id='submit']",
-      "css": "button#submit",
-      "id": "#submit",
-      "text": ":contains('Log in')",
-      "attribute": "[type=\"submit\"]",
-      "combined": "button#submit.main-button.button.button--md.button--blue.disabled[type=\"submit\"]"
+      "xpath": "xpath=//div[contains(@class, 'border-hl_bg_00_60') and contains(@class, 'text-hl_text_00') and contains(@class, 'hover:bg-hl_bg_00_4') and contains(@class, 'flex') and contains(@class, 'h-[32px]') and contains(@class, 'min-w-[80px]') and contains(@class, 'cursor-pointer') and contains(@class, 'items-center') and contains(@class, 'justify-center') and contains(@class, 'rounded-full') and contains(@class, 'border') and contains(@class, 'px-[12px]') and contains(@class, 'text-center') and contains(@class, 'text-[13px]') and contains(@class, 'font-normal') and contains(@class, 'leading-[22px]')]/div[contains(@class, 'border-hl_bg_00_60') and contains(@class, 'text-hl_text_00') and contains(@class, 'hover:bg-hl_bg_00_4') and contains(@class, 'flex') and contains(@class, 'h-[32px]') and contains(@class, 'min-w-[80px]') and contains(@class, 'cursor-pointer') and contains(@class, 'items-center') and contains(@class, 'justify-center') and contains(@class, 'rounded-full') and contains(@class, 'border') and contains(@class, 'px-[12px]') and contains(@class, 'text-center') and contains(@class, 'text-[13px]') and contains(@class, 'font-normal') and contains(@class, 'leading-[22px]')]",
+      "css": "div.border-hl_bg_00_60.text-hl_text_00.hover:bg-hl_bg_00_4.flex.h-[32px].min-w-[80px].cursor-pointer.items-center.justify-center.rounded-full.border.px-[12px].text-center.text-[13px].font-normal.leading-[22px]",
+      "text": ":contains('Sign In')",
+      "combined": "div.border-hl_bg_00_60.text-hl_text_00.hover:bg-hl_bg_00_4.flex.h-[32px].min-w-[80px].cursor-pointer.items-center.justify-center.rounded-full.border.px-[12px].text-center.text-[13px].font-normal.leading-[22px]"
     },
-    "element_tag": "button",
-    "element_text": "Log in",
-    "source_xpath": "//*[@id=\"submit\"]",
-    "html_context": "<button id=\"submit\" class=\"main-button button button--md button--blue disabled\" type=\"submit\" disabl..."
+    "element_tag": "div",
+    "element_text": "Sign In"
   }
 }

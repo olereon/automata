@@ -6,7 +6,7 @@ credentials/
 html_pages/
 __pycache__/
 .roo/commands/
-AGENTS.md
+# AGENTS.md is now tracked, so remove it from gitignore
 .coverage
 *.egg-info/
 .pytest_cache/
@@ -14,7 +14,28 @@ htmlcov/
 *.backup
 *_json_auth_testing_todo.md
 freep_add_img.json
-selectors.json
+# selectors.json is now tracked, so remove it from gitignore
+
+# Todo files for task tracking
+*_todo.md
+
+# Test result files
+*_test_results.md
+
+# Test HTML files
+test_*.html
+
+# Test Python files
+test_*.py
+
+# Fixed selector files
+fixed_selectors.json
+
+# Issue report files
+*_issue_report.md
+
+# MCP server implementation (temporary)
+src/automata/mcp_server/
 
 # Debug files
 debug_*.py

@@ -74,6 +74,8 @@ class MCPClient:
         # Parse URL to determine transport type
         parsed_url = urlparse(server_url)
         self.transport_type = parsed_url.scheme
+        self.host = parsed_url.hostname
+        self.port = parsed_url.port
         
         # Connection state
         self._connected = False
@@ -110,14 +112,10 @@ class MCPClient:
             # Check if server is reachable
             if self.transport_type in ("ws", "wss"):
                 # For WebSocket, check HTTP endpoint first
-                http_url = self.server_url
-                if http_url.startswith("ws://"):
-                    http_url = http_url.replace("ws://", "http://")
-                elif http_url.startswith("wss://"):
-                    http_url = http_url.replace("wss://", "https://")
+                http_url = f"http://{self.host}:{self.port + 1}/health"
                 
                 try:
-                    response = await self._session.get(f"{http_url}/health")
+                    response = await self._session.get(http_url)
                     if response.status != 200:
                         logger.warning(f"MCP server health check returned status: {response.status}")
                 except Exception as e:
@@ -125,6 +123,12 @@ class MCPClient:
                 
                 # Connect via WebSocket for real-time communication
                 self._connection = await websockets.connect(self.server_url)
+                
+                # Set connected state before starting listen task
+                self._connected = True
+                
+                # Start listening for messages
+                self._listen_task = asyncio.create_task(self._listen_for_messages())
             elif self.transport_type in ("http", "https"):
                 # For HTTP transport, use SSE for receiving messages
                 self._sse_url = f"{self.server_url}/sse" if not self.server_url.endswith("/sse") else self.server_url
@@ -137,18 +141,23 @@ class MCPClient:
                 except Exception as e:
                     logger.warning(f"Health check failed: {e}")
                 
+                # Set connected state before starting listen task
+                self._connected = True
+                
                 # Start listening for SSE messages
                 self._listen_task = asyncio.create_task(self._listen_for_sse_messages())
             else:
                 raise MCPConnectionError(f"Unsupported transport type: {self.transport_type}")
 
             # Send initialize message with extension mode if enabled
+            self._request_counter += 1
             init_message = {
                 "type": "initialize",
                 "protocolVersion": "2024-11-05",
                 "capabilities": {
                     "tools": {}
-                }
+                },
+                "id": str(self._request_counter)
             }
             
             if self.extension_mode:
@@ -160,7 +169,7 @@ class MCPClient:
             await self._send_message(init_message)
 
             # Wait for initialized response
-            response = await self._wait_for_response("initialized")
+            response = await self._wait_for_response(str(self._request_counter))
             if not response.get("success", False):
                 raise MCPConnectionError(f"Failed to initialize MCP connection: {response.get('message', 'Unknown error')}")
 
@@ -168,7 +177,6 @@ class MCPClient:
             if "capabilities" in response:
                 self._capabilities = response["capabilities"]
 
-            self._connected = True
             logger.info("Successfully connected to MCP server")
 
         except Exception as e:
@@ -232,9 +240,26 @@ class MCPClient:
             return False
             
         if self.transport_type in ("ws", "wss"):
-            return self._connection and not self._connection.closed
+            # Check if WebSocket connection is open
+            if self._connection is None:
+                return False
+            try:
+                # For WebSocket, check if the connection is still open
+                return not self._connection.closed
+            except AttributeError:
+                # If the connection doesn't have a 'closed' attribute,
+                # assume it's still connected if _connected is True
+                return self._connected
         else:
-            return self._session and not self._session.closed
+            # For HTTP/SSE, check if session is still active
+            if self._session is None:
+                return False
+            try:
+                return not self._session.closed
+            except AttributeError:
+                # If the session doesn't have a 'closed' attribute,
+                # assume it's still connected if _connected is True
+                return self._connected
 
     async def get_capabilities(self) -> Dict[str, Any]:
         """

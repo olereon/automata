@@ -24,6 +24,16 @@ This file provides guidance to agents when working with code in this repository.
 - Consistent error handling patterns throughout codebase
 - Asynchronous programming with asyncio - follow existing coroutine patterns
 
+## Use of brave-search MCP server for troubleshooting information
+- Code and Debug Modes are encouraged to use brave-search MCP server to look online the information and documentation for troubleshooting
+
+## Use of tavily MCP server for research and analysis
+- Code and Architect Modes are encouraged to use tavily MCP server to look online for the relevant information needed for research and analysis 
+
+## Use of sequentialthinking MCP for complex planning, problem solving, and debugging
+- Code, Debug, and Architect Modes are encouraged to use the sequentialthinking MCP server for complex and extended tasks involing hard issue solving, multi-phased debugging, and elaborate codebase architecture or feature design planning.
+
+
 ## Git commands and tools
 - Prefer running `git status` via the `execute_command` tool instead of `git_status`; it is more reliable.
 
