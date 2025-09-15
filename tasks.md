@@ -80,3 +80,12 @@
 [x] Design the output format for XPath-based selector generation
 [x] Create a comprehensive test plan for XPath input functionality
 [x] Document the new XPath input functionality
+
+## MCP Bridge Integration
+[x] Design MCP Bridge architecture and integration points
+[x] Create MCP configuration management module
+[x] Implement MCP client for communicating with Playwright MCP server
+[x] Develop MCP Bridge connector for tab management and browser automation
+[x] Integrate MCP Bridge with existing BrowserManager
+[x] Add MCP Bridge options to CLI interface
+[x] Create MCP Bridge test and configuration commands
