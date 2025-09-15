@@ -1,0 +1,2463 @@
+[
+  {
+    "tag": "button",
+    "text": "Toggle menu",
+    "selectors": {
+      "class": ".flex.items-center.text-surface-foreground-0.lg:hidden"
+    }
+  },
+  {
+    "tag": "button",
+    "text": "AI Suite",
+    "selectors": {
+      "class": ".focus:outline-none.cursor-pointer.no-underline.md:order-2.p-3.text-surface-foreground-0.hover:text-surface-foreground-2",
+      "attributes": "button[data-cy='ai-tools-menu'][type='button'][aria-haspopup='dialog'][aria-expanded='false'][aria-controls='radix-:R2i9kq6:'][data-state='closed']"
+    },
+    "position": {
+      "x": 212,
+      "y": 13.375,
+      "width": 78.234375,
+      "height": 41.25
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Stock",
+    "selectors": {
+      "class": ".focus:outline-none.cursor-pointer.no-underline.md:order-2.p-3.text-surface-foreground-0.hover:text-surface-foreground-2",
+      "attributes": "button[data-cy='stock-menu'][type='button'][aria-haspopup='dialog'][aria-expanded='false'][aria-controls='radix-:R4i9kq6:'][data-state='closed']"
+    },
+    "position": {
+      "x": 290.234375,
+      "y": 13.375,
+      "width": 64.1875,
+      "height": 41.25
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Resources",
+    "selectors": {
+      "class": ".focus:outline-none.cursor-pointer.no-underline.md:order-2.p-3.text-surface-foreground-0.hover:text-surface-foreground-2",
+      "attributes": "button[data-cy='resources-menu'][type='button'][aria-haspopup='dialog'][aria-expanded='false'][aria-controls='radix-:R6i9kq6:'][data-state='closed']"
+    },
+    "position": {
+      "x": 354.421875,
+      "y": 13.375,
+      "width": 98.59375,
+      "height": 41.25
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Search",
+    "selectors": {
+      "class": ".relative.top-px.flex.size-8.items-center.justify-center"
+    }
+  },
+  {
+    "tag": "button",
+    "text": "How to start with AI",
+    "selectors": {
+      "class": ".flex.items-center.justify-center.gap-2.font-semibold.transition.duration-150.ease-in-out.disabled:cursor-not-allowed.disabled:opacity-50.disabled:aria-pressed:cursor-default.disabled:aria-pressed:opacity-100.focus-visible:outline.focus-visible:outline-2.focus-visible:outline-offset-2.focus-visible:outline-surface-border-10.active:outline-none.text-nowrap.text-xs.px-4.h-8.text-default-foreground-0.aria-pressed:bg-default-2.hover:bg-default-1.disabled:hover:bg-default-0.active:bg-default-2.disabled:active:bg-default-0.rounded-full.bg-transparent.border.border-outline-border-0.lg:mb-12",
+      "attributes": "button[data-cy='how-to-start-button-desktop']"
+    },
+    "position": {
+      "x": 1037.46875,
+      "y": 1383.953125,
+      "width": 147.53125,
+      "height": 32
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Images",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.bg-white/10.text-white.styles_pill__xSaxV",
+      "attributes": "button[data-cy='feature-list-features.sections.images']"
+    },
+    "position": {
+      "x": 80,
+      "y": 1469.953125,
+      "width": 132.609375,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Video",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.text-white/60.styles_pill__xSaxV",
+      "attributes": "button[data-cy='feature-list-features.sections.video']"
+    },
+    "position": {
+      "x": 80,
+      "y": 1539.953125,
+      "width": 118.546875,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Audio",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.text-white/60.styles_pill__xSaxV",
+      "attributes": "button[data-cy='feature-list-features.sections.audio']"
+    },
+    "position": {
+      "x": 80,
+      "y": 1609.953125,
+      "width": 118.71875,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Illustrations",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.text-white/60.styles_pill__xSaxV",
+      "attributes": "button[data-cy='feature-list-features.sections.illustrations']"
+    },
+    "position": {
+      "x": 80,
+      "y": 1679.953125,
+      "width": 172.5,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Design",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.text-white/60.styles_pill__xSaxV",
+      "attributes": "button[data-cy='feature-list-features.sections.design']"
+    },
+    "position": {
+      "x": 80,
+      "y": 1749.953125,
+      "width": 129.578125,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "All AI tools",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.text-white/60.styles_pill__xSaxV"
+    },
+    "position": {
+      "x": 80,
+      "y": 1819.953125,
+      "width": 188.640625,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Image editing",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.bg-white/10.text-white.styles_pill__xSaxV",
+      "attributes": "button[data-cy='ai-generator-list-imageEdition']"
+    },
+    "position": {
+      "x": 80,
+      "y": 2881.5,
+      "width": 191.890625,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Image generation",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.text-white/60.styles_pill__xSaxV",
+      "attributes": "button[data-cy='ai-generator-list-imageGeneration']"
+    },
+    "position": {
+      "x": 291.890625,
+      "y": 2881.5,
+      "width": 229.03125,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Video generation",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.text-white/60.styles_pill__xSaxV",
+      "attributes": "button[data-cy='ai-generator-list-videoGeneration']"
+    },
+    "position": {
+      "x": 540.921875,
+      "y": 2881.5,
+      "width": 225.53125,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Video editing",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.text-white/60.styles_pill__xSaxV",
+      "attributes": "button[data-cy='ai-generator-list-videoEdition']"
+    },
+    "position": {
+      "x": 786.453125,
+      "y": 2881.5,
+      "width": 188.390625,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Audio generation",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.text-white/60.styles_pill__xSaxV",
+      "attributes": "button[data-cy='ai-generator-list-audioGeneration']"
+    },
+    "position": {
+      "x": 994.84375,
+      "y": 2881.5,
+      "width": 225.703125,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Social media",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.bg-white/10.text-white.styles_pill__xSaxV",
+      "attributes": "button[data-cy='creative-suite-list-creative.sections.socialMedia']"
+    },
+    "position": {
+      "x": 80,
+      "y": 3113.890625,
+      "width": 184.296875,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Advertising",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.text-white/60.styles_pill__xSaxV",
+      "attributes": "button[data-cy='creative-suite-list-creative.sections.advertising']"
+    },
+    "position": {
+      "x": 268.296875,
+      "y": 3113.890625,
+      "width": 171.375,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Video creation",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.text-white/60.styles_pill__xSaxV",
+      "attributes": "button[data-cy='creative-suite-list-creative.sections.videoCreation']"
+    },
+    "position": {
+      "x": 443.671875,
+      "y": 3113.890625,
+      "width": 201.078125,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Photography",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.text-white/60.styles_pill__xSaxV",
+      "attributes": "button[data-cy='creative-suite-list-creative.sections.photography']"
+    },
+    "position": {
+      "x": 648.75,
+      "y": 3113.890625,
+      "width": 184.984375,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Branding",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.text-white/60.styles_pill__xSaxV",
+      "attributes": "button[data-cy='creative-suite-list-creative.sections.branding']"
+    },
+    "position": {
+      "x": 837.734375,
+      "y": 3113.890625,
+      "width": 148.84375,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Printed materials",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.text-white/60.styles_pill__xSaxV",
+      "attributes": "button[data-cy='creative-suite-list-creative.sections.printedMaterials']"
+    },
+    "position": {
+      "x": 990.578125,
+      "y": 3113.890625,
+      "width": 223,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Audio creation",
+    "selectors": {
+      "class": ".font-normal.text-xl.rounded-full.py-3.px-6.lg:px-8.text-left.transition-colors.hover:bg-white/10.hover:text-white.whitespace-nowrap.focus:outline-none.focus:bg-white/10.text-white/60.styles_pill__xSaxV",
+      "attributes": "button[data-cy='creative-suite-list-creative.sections.audioCreation']"
+    },
+    "position": {
+      "x": 1217.578125,
+      "y": 3113.890625,
+      "width": 201.25,
+      "height": 54
+    }
+  },
+  {
+    "tag": "button",
+    "text": "",
+    "selectors": {
+      "class": ".flex.size-8.items-center.justify-center.rounded-full.bg-white/10.text-white.transition-colors.hover:bg-white/20",
+      "attributes": "button[disabled=''][data-cy='backward-arrow'][aria-label='Previous']"
+    },
+    "position": {
+      "x": 1113,
+      "y": 3748.28125,
+      "width": 32,
+      "height": 32
+    }
+  },
+  {
+    "tag": "button",
+    "text": "",
+    "selectors": {
+      "class": ".flex.size-8.items-center.justify-center.rounded-full.bg-white/10.text-white.transition-colors.hover:bg-white/20",
+      "attributes": "button[data-cy='forward-arrow'][aria-label='Next']"
+    },
+    "position": {
+      "x": 1153,
+      "y": 3748.28125,
+      "width": 32,
+      "height": 32
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Designers",
+    "selectors": {
+      "class": ".group.w-full.text-left.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "button[data-cy='profession-card-designers'][role='tab']"
+    },
+    "position": {
+      "x": 80,
+      "y": 3828.28125,
+      "width": 544.5,
+      "height": 200
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Marketers",
+    "selectors": {
+      "class": ".group.w-full.text-left.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "button[data-cy='profession-card-marketers'][role='tab']"
+    },
+    "position": {
+      "x": 640.5,
+      "y": 3828.28125,
+      "width": 544.5,
+      "height": 200
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Filmmakers",
+    "selectors": {
+      "class": ".group.w-full.text-left.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "button[data-cy='profession-card-vfxFilmmakers'][role='tab']"
+    },
+    "position": {
+      "x": 80,
+      "y": 4044.28125,
+      "width": 544.5,
+      "height": 200
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Content creators",
+    "selectors": {
+      "class": ".group.w-full.text-left.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "button[data-cy='profession-card-contentCreators'][role='tab']"
+    },
+    "position": {
+      "x": 640.5,
+      "y": 4044.28125,
+      "width": 544.5,
+      "height": 200
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Art directors",
+    "selectors": {
+      "class": ".group.w-full.text-left.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "button[data-cy='profession-card-artDirectors'][role='tab']"
+    },
+    "position": {
+      "x": 1217,
+      "y": 3828.28125,
+      "width": 544.5,
+      "height": 200
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Photographers",
+    "selectors": {
+      "class": ".group.w-full.text-left.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "button[data-cy='profession-card-photographers'][role='tab']"
+    },
+    "position": {
+      "x": 1777.5,
+      "y": 3828.28125,
+      "width": 544.5,
+      "height": 200
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Business owners",
+    "selectors": {
+      "class": ".group.w-full.text-left.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "button[data-cy='profession-card-businessOwners'][role='tab']"
+    },
+    "position": {
+      "x": 1217,
+      "y": 4044.28125,
+      "width": 544.5,
+      "height": 200
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Teachers",
+    "selectors": {
+      "class": ".group.w-full.text-left.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "button[data-cy='profession-card-teachers'][role='tab']"
+    },
+    "position": {
+      "x": 1777.5,
+      "y": 4044.28125,
+      "width": 544.5,
+      "height": 200
+    }
+  },
+  {
+    "tag": "button",
+    "text": "",
+    "selectors": {
+      "class": ".flex.size-8.items-center.justify-center.rounded-full.bg-white/10.text-white.transition-colors.hover:bg-white/20",
+      "attributes": "button[data-cy='backward-arrow'][aria-label='Previous']"
+    },
+    "position": {
+      "x": 1113,
+      "y": 4342.671875,
+      "width": 32,
+      "height": 32
+    }
+  },
+  {
+    "tag": "button",
+    "text": "",
+    "selectors": {
+      "class": ".flex.size-8.items-center.justify-center.rounded-full.bg-white/10.text-white.transition-colors.hover:bg-white/20",
+      "attributes": "button[data-cy='forward-arrow'][aria-label='Next']"
+    },
+    "position": {
+      "x": 1153,
+      "y": 4342.671875,
+      "width": 32,
+      "height": 32
+    }
+  },
+  {
+    "tag": "button",
+    "text": "",
+    "selectors": {
+      "class": ".absolute.inset-0.bg-black/20.transition-opacity.duration-300.[&:hover>div]:bg-white/20",
+      "attributes": "button[data-cy='work-video-play-three'][aria-label='Play video']"
+    },
+    "position": {
+      "x": 232.5,
+      "y": 4422.671875,
+      "width": 800,
+      "height": 450
+    }
+  },
+  {
+    "tag": "button",
+    "text": "",
+    "selectors": {
+      "class": ".absolute.inset-0.bg-black/20.transition-opacity.duration-300.[&:hover>div]:bg-white/20",
+      "attributes": "button[data-cy='work-video-play-one'][aria-label='Play video']"
+    },
+    "position": {
+      "x": 1064.5,
+      "y": 4422.671875,
+      "width": 800,
+      "height": 450
+    }
+  },
+  {
+    "tag": "button",
+    "text": "",
+    "selectors": {
+      "class": ".absolute.inset-0.bg-black/20.transition-opacity.duration-300.[&:hover>div]:bg-white/20",
+      "attributes": "button[data-cy='work-video-play-two'][aria-label='Play video']"
+    },
+    "position": {
+      "x": -599.50048828125,
+      "y": 4422.671875,
+      "width": 800,
+      "height": 450
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Is my content private and secure? Does Freepik use my inputs or outputs to train its models?",
+    "selectors": {
+      "class": ".flex.w-full.items-center.justify-between.gap-10.text-left.leading-relaxed.py-4.text-lg.text-surface-foreground-0.data-[state=open]:text-surface-accent-0.text-lg.font-normal.text-white.data-[state=open]:text-white.[&_svg]:text-white.group/trigger",
+      "attributes": "button[type='button'][aria-controls='radix-:R3bj9kq6:'][aria-expanded='false'][data-state='closed']"
+    },
+    "position": {
+      "x": 200.5,
+      "y": 6796.265625,
+      "width": 864,
+      "height": 60.796875
+    }
+  },
+  {
+    "tag": "button",
+    "text": "How do credits work, and how many generations do I get per tool?",
+    "selectors": {
+      "class": ".flex.w-full.items-center.justify-between.gap-10.text-left.leading-relaxed.py-4.text-lg.text-surface-foreground-0.data-[state=open]:text-surface-accent-0.text-lg.font-normal.text-white.data-[state=open]:text-white.[&_svg]:text-white.group/trigger",
+      "attributes": "button[type='button'][aria-controls='radix-:R5bj9kq6:'][aria-expanded='false'][data-state='closed']"
+    },
+    "position": {
+      "x": 200.5,
+      "y": 6890.0625,
+      "width": 864,
+      "height": 60.796875
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Can I use AI-generated content commercially, and do I own the rights to it?",
+    "selectors": {
+      "class": ".flex.w-full.items-center.justify-between.gap-10.text-left.leading-relaxed.py-4.text-lg.text-surface-foreground-0.data-[state=open]:text-surface-accent-0.text-lg.font-normal.text-white.data-[state=open]:text-white.[&_svg]:text-white.group/trigger",
+      "attributes": "button[type='button'][aria-controls='radix-:R7bj9kq6:'][aria-expanded='false'][data-state='closed']"
+    },
+    "position": {
+      "x": 200.5,
+      "y": 6983.859375,
+      "width": 864,
+      "height": 60.796875
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Do I need to attribute to use Freepik stock content?",
+    "selectors": {
+      "class": ".flex.w-full.items-center.justify-between.gap-10.text-left.leading-relaxed.py-4.text-lg.text-surface-foreground-0.data-[state=open]:text-surface-accent-0.text-lg.font-normal.text-white.data-[state=open]:text-white.[&_svg]:text-white.group/trigger",
+      "attributes": "button[type='button'][aria-controls='radix-:R9bj9kq6:'][aria-expanded='false'][data-state='closed']"
+    },
+    "position": {
+      "x": 200.5,
+      "y": 7077.65625,
+      "width": 864,
+      "height": 60.796875
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Do you offer legal indemnification for AI and stock content?",
+    "selectors": {
+      "class": ".flex.w-full.items-center.justify-between.gap-10.text-left.leading-relaxed.py-4.text-lg.text-surface-foreground-0.data-[state=open]:text-surface-accent-0.text-lg.font-normal.text-white.data-[state=open]:text-white.[&_svg]:text-white.group/trigger",
+      "attributes": "button[type='button'][aria-controls='radix-:Rbbj9kq6:'][aria-expanded='false'][data-state='closed']"
+    },
+    "position": {
+      "x": 200.5,
+      "y": 7171.453125,
+      "width": 864,
+      "height": 60.796875
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Products",
+    "selectors": {
+      "class": ".flex.w-full.items-center.justify-between.py-2.5.text-sm.text-neutral-600.sm:py-1.5",
+      "attributes": "button[type='button'][aria-controls='radix-:R6r9kq6:'][aria-expanded='true'][data-state='open'][style='cursor:auto']"
+    },
+    "position": {
+      "x": 116,
+      "y": 7940.359375,
+      "width": 250.75,
+      "height": 34.390625
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Get started",
+    "selectors": {
+      "class": ".flex.w-full.items-center.justify-between.py-2.5.text-sm.text-neutral-600.sm:py-1.5",
+      "attributes": "button[type='button'][aria-controls='radix-:Rar9kq6:'][aria-expanded='true'][data-state='open'][style='cursor:auto']"
+    },
+    "position": {
+      "x": 376.75,
+      "y": 7940.359375,
+      "width": 250.75,
+      "height": 34.390625
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Cookie settings",
+    "selectors": {
+      "class": ".ot-sdk-show-settings.inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-0.no-underline.sm:py-2"
+    },
+    "position": {
+      "x": 376.75,
+      "y": 8281.875,
+      "width": 102.546875,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "button",
+    "text": "Company",
+    "selectors": {
+      "class": ".flex.w-full.items-center.justify-between.py-2.5.text-sm.text-neutral-600.sm:py-1.5",
+      "attributes": "button[type='button'][aria-controls='radix-:Rer9kq6:'][aria-expanded='true'][data-state='open'][style='cursor:auto']"
+    },
+    "position": {
+      "x": 637.5,
+      "y": 7940.359375,
+      "width": 250.75,
+      "height": 34.390625
+    }
+  },
+  {
+    "tag": "button",
+    "text": "English",
+    "selectors": {
+      "class": ".$items-center.$transition-colors.$duration-[300ms].$no-underline.$inline-flex.$py-[10px].$px-[25px].$sprinkles-text-base.$font-semibold.$rounded-[6px].$whitespace-nowrap.$bg-blueFreepik.$text-white.hover:$bg-blueScience.dark:$text-blueScience.dark:hover:$bg-blueFreepik.bg-transparent.text-surface-foreground-0.outline.outline-1.outline-surface-3.hover:bg-transparent.focus:bg-surface-2",
+      "attributes": "button[type='button']"
+    },
+    "position": {
+      "x": 898.25,
+      "y": 8104.75,
+      "width": 139.921875,
+      "height": 44
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".flex.text-inherit.no-underline",
+      "attributes": "a[href='/'][aria-label='Freepik']"
+    },
+    "position": {
+      "x": 20,
+      "y": 12,
+      "width": 160,
+      "height": 44
+    }
+  },
+  {
+    "tag": "a",
+    "text": "AI AssistantNew",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/pikaso/assistant#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "AI Image Generator",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/ai/image-generator#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Reimagine image",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/ai/reimagine#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Background Generator",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/ai/background-generator#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Image Editor",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/ai/photo-editor#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Background Remover",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/ai/background-remover#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Upscale image",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/ai/image-upscaler#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Expand image",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/ai/image-extender#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Retouch objects",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/ai/remove-objects#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "AI Video Generator",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/ai/video-generator#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Video EditorNew",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/ai/video-editor#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Video Upscaler",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/ai/video-upscaler#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Text to Speech",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/ai/voice-generator#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Sound Effects",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/ai/sound-effect-generator#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Design Editor",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='https://www.freepik.com/designer#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Mockup Generator",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/mockup-generator#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Icon Generator",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/ai/icon-generator#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "AI News",
+    "selectors": {
+      "class": ".flex.items-center.gap-1.self-start.text-sm.font-normal.text-surface-foreground-0",
+      "attributes": "a[href='/ai#from_element=mainmenu'][data-cy='section-main-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Photos",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/photos#from_element=mainmenu']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Vectors",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/vectors#from_element=mainmenu']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Illustrations",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/illustrations#from_element=mainmenu']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Video",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/videos#from_element=mainmenu']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Video templates",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/video-templates#from_element=mainmenu']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Motion graphics",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/motion-graphics#from_element=mainmenu']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Audio",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='https://www.freepik.com/audio#from_element=mainmenu'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Icons",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/icons#from_element=mainmenu']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Templates",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/templates#from_element=mainmenu']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Mockups",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/mockups#from_element=mainmenu']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "PSD",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/psd#from_element=mainmenu']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "3D",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/3d-models#from_element=mainmenu']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Fonts",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/fonts#from_element=mainmenu']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "All images",
+    "selectors": {
+      "class": ".flex.items-center.gap-1.self-start.text-sm.font-normal.text-surface-foreground-0",
+      "attributes": "a[data-cy='section-main-link'][href='https://www.freepik.com/images#from_element=mainmenu']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "About usMeet the team and 15 years of history",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/company/about-us']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "AI Partners ProgramTop creatives and affiliates program",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/ai/partners']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "BlogCreativity news and tips",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='https://www.freepik.com/blog/'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Get helpGet support from our team",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/profile/support']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Contact usPress and partnerships",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/company/about-us#contact-us']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Enterprise",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[data-cy='top-menu-link'][href='https://www.freepik.com/enterprise']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "API for developers",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='/api'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Android App",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='https://play.google.com/store/apps/details?id=com.freepikcompany.freepik'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "iOS App",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='https://apps.apple.com/us/app/freepik-ai-video-generator/id1664092086'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Figma plugin",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded.p-1",
+      "attributes": "a[href='https://www.figma.com/@freepik'][data-cy='top-menu-link']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Events",
+    "selectors": {
+      "class": ".flex.items-center.gap-1.text-sm.font-normal.text-surface-foreground-0.hover:text-surface-foreground-2",
+      "attributes": "a[href='https://www.freepik.com/events']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Enterprise",
+    "selectors": {
+      "class": ".hidden.cursor-pointer.p-3.text-surface-foreground-0.no-underline.hover:text-surface-foreground-2.md:order-2.xl:block",
+      "attributes": "a[href='/enterprise#from_element=mainmenu'][data-cy='enterprise-menu']"
+    },
+    "position": {
+      "x": 453.015625,
+      "y": 13.375,
+      "width": 96.546875,
+      "height": 41.25
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Pricing",
+    "selectors": {
+      "class": ".cursor-pointer.p-3.text-surface-foreground-0.no-underline.hover:text-surface-foreground-2.md:order-2",
+      "attributes": "a[data-cy='pricing-menu'][href='https://www.freepik.com/pricing?origin=freepik_web#from_element=mainmenu']"
+    },
+    "position": {
+      "x": 549.5625,
+      "y": 13.375,
+      "width": 73.28125,
+      "height": 41.25
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Sign in",
+    "selectors": {
+      "class": ".-mr-2.flex.cursor-pointer.p-2.text-surface-foreground-0.no-underline.hover:text-surface-foreground-2",
+      "attributes": "a[href='https://www.freepik.com/log-in?client_id=freepik&lang=en'][data-cy='signin-button']"
+    },
+    "position": {
+      "x": 1188.953125,
+      "y": 17.375,
+      "width": 64.046875,
+      "height": 33.25
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Get started for free",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded-full.bg-white.px-5.py-2.text-sm.font-semibold.text-black.focus:bg-white/90.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/log-in?client_id=freepik&lang=en#from_element=home_hero']"
+    },
+    "position": {
+      "x": 535.4375,
+      "y": 325.609375,
+      "width": 194.109375,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "All AI tools",
+    "selectors": {
+      "class": ".group.whitespace-nowrap",
+      "attributes": "a[href='/ai#from_element=home_tools']"
+    },
+    "position": {
+      "x": 80,
+      "y": 1819.953125,
+      "width": 188.640625,
+      "height": 54
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Generate an AI imageTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-image-generator#from_element=home_tools&from_view=images']"
+    },
+    "position": {
+      "x": 326.59375,
+      "y": 1469.953125,
+      "width": 264.796875,
+      "height": 317.75
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".absolute.bottom-6.right-6.flex.size-10.items-center.justify-center.rounded-full.bg-black.text-white.transition-opacity.duration-300.group-hover:opacity-100.group-focus:opacity-100.2xl-legacy:opacity-0",
+      "attributes": "a[data-cy='feature-info-button-features.cards.generateImage'][aria-label='Learn more, Generate an AI image'][href='https://www.freepik.com/ai/image-generator#from_element=home_tools&from_view=images']"
+    },
+    "position": {
+      "x": 527.390625,
+      "y": 1723.71875,
+      "width": 40,
+      "height": 40
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Chat with AI to transform imagesTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/assistant#from_element=home_tools&from_view=images']"
+    },
+    "position": {
+      "x": 623.390625,
+      "y": 1469.953125,
+      "width": 264.796875,
+      "height": 317.75
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Find high-quality imagesFind",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/photos#from_element=home_tools&from_view=images']"
+    },
+    "position": {
+      "x": 920.1875,
+      "y": 1469.953125,
+      "width": 264.8125,
+      "height": 317.765625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Edit an imageTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/image-editor?tool=adjust#from_element=home_tools&from_view=images']"
+    },
+    "position": {
+      "x": 326.59375,
+      "y": 1819.71875,
+      "width": 264.796875,
+      "height": 317.75
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".absolute.bottom-6.right-6.flex.size-10.items-center.justify-center.rounded-full.bg-black.text-white.transition-opacity.duration-300.group-hover:opacity-100.group-focus:opacity-100.2xl-legacy:opacity-0",
+      "attributes": "a[data-cy='feature-info-button-features.cards.editImage'][aria-label='Learn more, Edit an image'][href='https://www.freepik.com/ai/photo-editor#from_element=home_tools&from_view=images']"
+    },
+    "position": {
+      "x": 527.390625,
+      "y": 2073.484375,
+      "width": 40,
+      "height": 40
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Create on-brand AI imagesTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-image-generator?colors=1#from_element=home_tools&from_view=images']"
+    },
+    "position": {
+      "x": 623.390625,
+      "y": 1819.71875,
+      "width": 264.796875,
+      "height": 317.75
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Upscale an image up to 10KTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/upscaler#from_element=home_tools&from_view=images']"
+    },
+    "position": {
+      "x": 920.1875,
+      "y": 1819.71875,
+      "width": 264.8125,
+      "height": 317.765625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".absolute.bottom-6.right-6.flex.size-10.items-center.justify-center.rounded-full.bg-black.text-white.transition-opacity.duration-300.group-hover:opacity-100.group-focus:opacity-100.2xl-legacy:opacity-0",
+      "attributes": "a[data-cy='feature-info-button-features.cards.upscaleImage'][aria-label='Learn more, Upscale an image up to 10K'][href='https://www.freepik.com/ai/image-upscaler#from_element=home_tools&from_view=images']"
+    },
+    "position": {
+      "x": 1121,
+      "y": 2073.484375,
+      "width": 40,
+      "height": 40
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Generate an AI videoTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-video-generator#from_element=home_tools&from_view=video']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".absolute.bottom-6.right-6.flex.size-10.items-center.justify-center.rounded-full.bg-black.text-white.transition-opacity.duration-300.group-hover:opacity-100.group-focus:opacity-100.2xl-legacy:opacity-0",
+      "attributes": "a[data-cy='feature-info-button-features.cards.createVideo'][aria-label='Learn more, Generate an AI video'][href='https://www.freepik.com/ai/video-generator#from_element=home_tools&from_view=video']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Find stock videosFind",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/videos#from_element=home_tools&from_view=video']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Edit a videoTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/video-editor#from_element=home_tools&from_view=video']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".absolute.bottom-6.right-6.flex.size-10.items-center.justify-center.rounded-full.bg-black.text-white.transition-opacity.duration-300.group-hover:opacity-100.group-focus:opacity-100.2xl-legacy:opacity-0",
+      "attributes": "a[data-cy='feature-info-button-features.cards.editVideo'][aria-label='Learn more, Edit a video'][href='https://www.freepik.com/ai/video-editor#from_element=home_tools&from_view=video']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Add sound effects to a videoTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/video-soundfx#from_element=home_tools&from_view=video']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".absolute.bottom-6.right-6.flex.size-10.items-center.justify-center.rounded-full.bg-black.text-white.transition-opacity.duration-300.group-hover:opacity-100.group-focus:opacity-100.2xl-legacy:opacity-0",
+      "attributes": "a[data-cy='feature-info-button-features.cards.soundEffectsToVideo'][aria-label='Learn more, Add sound effects to a video'][href='https://www.freepik.com/ai/sound-effect-generator#from_element=home_tools&from_view=video']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Upscale a video up to 4KTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/video-upscaler#from_element=home_tools&from_view=video']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".absolute.bottom-6.right-6.flex.size-10.items-center.justify-center.rounded-full.bg-black.text-white.transition-opacity.duration-300.group-hover:opacity-100.group-focus:opacity-100.2xl-legacy:opacity-0",
+      "attributes": "a[data-cy='feature-info-button-features.cards.upscaleVideo'][aria-label='Learn more, Upscale a video up to 4K'][href='https://www.freepik.com/ai/video-upscaler#from_element=home_tools&from_view=video']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Create lip syncTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/video-lip-sync#from_element=home_tools&from_view=video']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Generate a voiceoverTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/voiceover-generator#from_element=home_tools&from_view=audio']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".absolute.bottom-6.right-6.flex.size-10.items-center.justify-center.rounded-full.bg-black.text-white.transition-opacity.duration-300.group-hover:opacity-100.group-focus:opacity-100.2xl-legacy:opacity-0",
+      "attributes": "a[data-cy='feature-info-button-features.cards.generateVoiceover'][aria-label='Learn more, Generate a voiceover'][href='https://www.freepik.com/ai/voice-generator#from_element=home_tools&from_view=audio']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Find royalty-free stock musicFind",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/audio/music#from_element=home_tools&from_view=audio']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Generate sound effectsTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/audio/sound-effects/generator/generate#from_element=home_tools&from_view=audio']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".absolute.bottom-6.right-6.flex.size-10.items-center.justify-center.rounded-full.bg-black.text-white.transition-opacity.duration-300.group-hover:opacity-100.group-focus:opacity-100.2xl-legacy:opacity-0",
+      "attributes": "a[data-cy='feature-info-button-features.cards.createSoundEffects'][aria-label='Learn more, Generate sound effects'][href='https://www.freepik.com/ai/sound-effect-generator#from_element=home_tools&from_view=audio']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Add sound effects to a videoTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/video-soundfx#from_element=home_tools&from_view=audio']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".absolute.bottom-6.right-6.flex.size-10.items-center.justify-center.rounded-full.bg-black.text-white.transition-opacity.duration-300.group-hover:opacity-100.group-focus:opacity-100.2xl-legacy:opacity-0",
+      "attributes": "a[data-cy='feature-info-button-features.cards.soundEffectsToVideo'][aria-label='Learn more, Add sound effects to a video'][href='https://www.freepik.com/ai/sound-effect-generator#from_element=home_tools&from_view=audio']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Find stock sound effectsFind",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/audio/sound-effects/stock#from_element=home_tools&from_view=audio']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Find intros and outrosFind",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/audio/sound-effects/intros-and-outros#from_element=home_tools&from_view=audio']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Generate AI IllustrationsTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-image-generator?create=illustration#from_element=home_tools&from_view=illustrations']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Find stock vectorsFind",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/vectors#from_element=home_tools&from_view=illustrations']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Find stock illustrationsFind",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/illustrations#from_element=home_tools&from_view=illustrations']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Create on-brand AI illustrationsTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-image-generator?create=style#from_element=home_tools&from_view=illustrations']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Animate an illustrationTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-video-generator?api=minimax&mode=video-01-live2d#from_element=home_tools&from_view=illustrations']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Convert any image to SVGTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/edit#from_element=home_tools&from_view=illustrations']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Use AI Assistant for graphic designTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/assistant#from_element=home_tools&from_view=design']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Find stock templates and PSDsFind",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/templates#from_element=home_tools&from_view=design']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Create social media postsTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/designer/edit?template=new-artboard&size=Instagram+Post&category_name=Instagram+Posts&category_id=1915&lang=en&search=Instagram+Posts#from_element=home_tools&from_view=design']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Generate a mockupTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/pikaso/mockup#from_element=mainmenu#from_element=home_tools&from_view=design']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Create banners, posters, and moreTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/designer/edit?template=new-artboard#from_element=home_tools&from_view=design']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Generate AI iconsTry it",
+    "selectors": {
+      "class": ".group.transition-opacity.focus:opacity-80.focus:outline-none",
+      "attributes": "a[href='https://www.freepik.com/ai/icon-generator/tool#from_element=home_tools&from_view=design']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".absolute.bottom-6.right-6.flex.size-10.items-center.justify-center.rounded-full.bg-black.text-white.transition-opacity.duration-300.group-hover:opacity-100.group-focus:opacity-100.2xl-legacy:opacity-0",
+      "attributes": "a[data-cy='feature-info-button-features.cards.designIcon'][aria-label='Learn more, Generate AI icons'][href='https://www.freepik.com/ai/icon-generator#from_element=home_tools&from_view=design']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itAuto-resize for each platform. Make your design fit every social format, fast.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/image-editor#from_element=creative_usecases&from_view=socialMedia'][style='transform: translate3d(0px, 0px, 0px);']"
+    },
+    "position": {
+      "x": 80,
+      "y": 3207.890625,
+      "width": 400,
+      "height": 442
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itCreate on-brand stories and reels. Stay true to your brand style in every post.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-image-generator?colors=1#from_element=creative_usecases&from_view=socialMedia'][style='transform: translate3d(20px, 0px, 0px);']"
+    },
+    "position": {
+      "x": 500,
+      "y": 3207.890625,
+      "width": 400,
+      "height": 442
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itRemove background to highlight subjects. Clean up your content and keep the focus on your subject.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/image-editor?tool=background#from_element=creative_usecases&from_view=socialMedia'][style='transform: translate3d(40px, 0px, 0px);']"
+    },
+    "position": {
+      "x": 920,
+      "y": 3207.890625,
+      "width": 400,
+      "height": 442
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itGenerate social media posts. Need content fast? Get scroll-worthy posts in seconds.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/designer/edit?template=new-artboard&size=Instagram+Post&category_name=Instagram+Posts&category_id=1915&lang=en&search=Instagram+Posts#from_element=creative_usecases&from_view=socialMedia'][style='transform: translate3d(60px, 0px, 0px);']"
+    },
+    "position": {
+      "x": 1340,
+      "y": 3207.890625,
+      "width": 400,
+      "height": 442
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itCreate ad variants for A/B testing. Upload your asset to get multiple ad variations\u2014ready to test.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/reimagine#from_element=creative_usecases&from_view=advertising'][style='transform: translate3d(0px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itTurn product photos into dynamic commercial videos. Create high-impact video ads from one image.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-video-generator#from_element=creative_usecases&from_view=advertising'][style='transform: translate3d(20px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itUpscale assets for high-res ad formats. From banners to billboards, upscale up to 10K resolution.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/upscaler#from_element=creative_usecases&from_view=advertising'][style='transform: translate3d(40px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itRepurpose ads for different channels. One campaign, all sizes\u2014ready for every platform.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/image-editor?tool=expand#from_element=creative_usecases&from_view=advertising'][style='transform: translate3d(60px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itAnimate your campaign shoots. Turn static images into scroll-stopping videos\u2014perfect for social, ads, and decks.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-video-generator?modelId=kling-20#from_element=creative_usecases&from_view=videoCreation'][style='transform: translate3d(0px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itAdd sound effects to your videos. Boost your videos with sound effects that grab attention.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/video-soundfx#from_element=creative_usecases&from_view=videoCreation'][style='transform: translate3d(20px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itCreate clips using consistent characters. Keep a cohesive look across all your clips.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-video-generator?modelId=kling-pro16-multi-image#from_element=creative_usecases&from_view=videoCreation'][style='transform: translate3d(40px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itReplace or remove objects. Clean up your image or swap in what you need.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/image-editor?tool=retouch#from_element=creative_usecases&from_view=photography'][style='transform: translate3d(0px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itEnhance image quality. Fix any blurry photos and upscale up to 10K.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/upscaler#from_element=creative_usecases&from_view=photography'][style='transform: translate3d(20px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itChange the location of your photo. Move your subject anywhere with a new background.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/image-editor?tool=background#from_element=creative_usecases&from_view=photography'][style='transform: translate3d(40px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itReimagine your photos as art. Give your images a bold new look with creative filters.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-image-generator#from_element=creative_usecases&from_view=photography'][style='transform: translate3d(60px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itAnimate still photography for socials. Add motion to your photos to boost your engagement.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-video-generator?api=kling&mode=std16#from_element=creative_usecases&from_view=photography'][style='transform: translate3d(80px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itTurn pictures into branded images. Adapt photos to match any brand\u2019s style and identity.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-image-generator?colors=1#from_element=creative_usecases&from_view=branding'][style='transform: translate3d(0px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itCreate unique brand mascots or illustrations. Give your brand personality with on-tone visuals.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-image-generator?colors=1#from_element=creative_usecases&from_view=branding'][style='transform: translate3d(20px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itBrainstorm logo concepts. Explore logo ideas to shape brand directions for your clients.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-image-generator#from_element=creative_usecases&from_view=branding'][style='transform: translate3d(40px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itMock up your logo on any photo. Showcase your logo in context, from packaging to posters.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/mockup#from_element=creative_usecases&from_view=branding'][style='transform: translate3d(60px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itImprove image resolution for printing. Enhance image quality for print\u2014up to 10K resolution, ready in seconds.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/upscaler#from_element=creative_usecases&from_view=printedMaterials'][style='transform: translate3d(0px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itAdjust your design for printing in different formats. Use it in brochures, posters, packaging, and more.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/image-editor?tool=expand#from_element=creative_usecases&from_view=printedMaterials'][style='transform: translate3d(20px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itMock up product packaging designs. Preview packaging concepts before presenting them to clients.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/mockup#from_element=creative_usecases&from_view=printedMaterials'][style='transform: translate3d(40px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itDesign posters and flyers. Create eye-catching posters and flyers for print or display.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/designer/edit?template=new-artboard&lang=en#from_element=creative_usecases&from_view=printedMaterials'][style='transform: translate3d(60px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itDesign album covers. Match your music's vibe with a standout cover.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-image-generator#from_element=creative_usecases&from_view=audioCreation'][style='transform: translate3d(0px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itCreate visuals for your songs. Design visuals that reflect your song\u2019s mood.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-image-generator#from_element=creative_usecases&from_view=audioCreation'][style='transform: translate3d(20px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itBuild voiceover scripts. Write ready-to-record scripts for your voiceovers.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/voiceover-generator#from_element=creative_usecases&from_view=audioCreation'][style='transform: translate3d(40px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Try itAnimate album visuals. Add motion to your album artwork for digital drops.",
+    "selectors": {
+      "class": ".keen-slider__slide.group.min-w-[280px].max-w-[280px].focus:outline-none.lg:min-w-[400px].lg:max-w-[400px].2xl-legacy:min-w-[460px].2xl-legacy:max-w-[460px].styles_creativeCard__UBzrs",
+      "attributes": "a[href='https://www.freepik.com/pikaso/ai-video-generator#from_element=creative_usecases&from_view=audioCreation'][style='transform: translate3d(60px, 0px, 0px);']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Learn more",
+    "selectors": {
+      "class": ".my-6.block.w-full.rounded-full.bg-white/10.px-4.py-3.text-center.text-base.font-semibold.text-white.transition-colors.duration-300.hover:bg-white/20.focus:outline-none",
+      "attributes": "a[href='/enterprise#from_element=home_pricing&from_view=enterprise']"
+    },
+    "position": {
+      "x": 113,
+      "y": 6208.375,
+      "width": 281,
+      "height": 49.59375
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Pricing page",
+    "selectors": {
+      "class": ".font-semibold.text-white",
+      "attributes": "a[href='https://www.freepik.com/pricing']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Terms of Use for AI Products",
+    "selectors": {
+      "class": ".font-semibold.text-white",
+      "attributes": "a[href='https://www.freepik.com/legal/terms-of-use#nav-ai-products']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Attribution Guide",
+    "selectors": {
+      "class": ".font-semibold.text-white",
+      "attributes": "a[href='https://support.freepik.com/s/article/Attribution-How-when-and-where?language=en_US']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Support Center",
+    "selectors": {
+      "class": ".font-semibold.text-white",
+      "attributes": "a[target='_blank'][href='https://support.freepik.com/#from_element=home_faqs']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "learn more about Freepik Enterprise",
+    "selectors": {
+      "class": ".font-semibold.text-white",
+      "attributes": "a[href='/enterprise#from_element=home_faqs'][target='_blank']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Get started for free",
+    "selectors": {
+      "class": ".group.flex.items-center.gap-2.rounded-full.bg-white.text-sm.font-semibold.text-black.focus:outline-none.focus:bg-white/90.px-6.py-3",
+      "attributes": "a[href='https://www.freepik.com/log-in?client_id=freepik&lang=en#from_element=home_footer']"
+    },
+    "position": {
+      "x": 531.4375,
+      "y": 7673.71875,
+      "width": 202.109375,
+      "height": 46.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".flex.text-[#1273EB].visited:text-[#1273EB].hover:text-[#1273EB].dark:text-white.dark:visited:text-white.dark:hover:text-white",
+      "attributes": "a[href='https://www.freepik.com'][aria-label='Freepik Company']"
+    },
+    "position": {
+      "x": 116,
+      "y": 7881.109375,
+      "width": 112,
+      "height": 19.25
+    }
+  },
+  {
+    "tag": "a",
+    "text": "AI Assistant",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='/pikaso/assistant']"
+    },
+    "position": {
+      "x": 116,
+      "y": 7974.75,
+      "width": 77.9375,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "AI Image Generator",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='/ai/image-generator']"
+    },
+    "position": {
+      "x": 116,
+      "y": 8013.140625,
+      "width": 128.21875,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "AI Video Generator",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='/ai/video-generator']"
+    },
+    "position": {
+      "x": 116,
+      "y": 8051.53125,
+      "width": 125.765625,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "AI Voice Generator",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='/ai/voice-generator']"
+    },
+    "position": {
+      "x": 116,
+      "y": 8089.921875,
+      "width": 124.46875,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "API",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='/api']"
+    },
+    "position": {
+      "x": 116,
+      "y": 8128.3125,
+      "width": 22.375,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Android",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='https://play.google.com/store/apps/details?id=com.freepikcompany.freepik'][target='_blank'][rel='noreferrer noopener nofollow']"
+    },
+    "position": {
+      "x": 116,
+      "y": 8166.703125,
+      "width": 51.90625,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "iOS",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='https://apps.apple.com/us/app/freepik-ai-video-generator/id1664092086'][target='_blank'][rel='noreferrer noopener nofollow']"
+    },
+    "position": {
+      "x": 116,
+      "y": 8205.09375,
+      "width": 23.078125,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "All Freepik tools",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='/ai']"
+    },
+    "position": {
+      "x": 116,
+      "y": 8243.484375,
+      "width": 105.203125,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Pricing",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='/pricing?origin=freepik_web']"
+    },
+    "position": {
+      "x": 376.75,
+      "y": 7974.75,
+      "width": 46,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Sell content",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='https://contributor.freepik.com']"
+    },
+    "position": {
+      "x": 376.75,
+      "y": 8013.140625,
+      "width": 77.984375,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Enterprise",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='/enterprise']"
+    },
+    "position": {
+      "x": 376.75,
+      "y": 8051.53125,
+      "width": 67.703125,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "FAQ",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='https://support.freepik.com/s/?language=en_US']"
+    },
+    "position": {
+      "x": 376.75,
+      "y": 8089.921875,
+      "width": 26.890625,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "AI Suite documentation",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='/ai/docs']"
+    },
+    "position": {
+      "x": 376.75,
+      "y": 8128.3125,
+      "width": 153.640625,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Terms of use",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='/legal/terms-of-use#nav-freepik'][target='_blank'][rel='noreferrer noopener']"
+    },
+    "position": {
+      "x": 376.75,
+      "y": 8166.703125,
+      "width": 86.53125,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Privacy policy",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='/legal/privacy'][target='_blank'][rel='noreferrer noopener']"
+    },
+    "position": {
+      "x": 376.75,
+      "y": 8205.09375,
+      "width": 92.28125,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Cookies policy",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='/legal/cookies'][target='_blank'][rel='noreferrer noopener']"
+    },
+    "position": {
+      "x": 376.75,
+      "y": 8243.484375,
+      "width": 96.921875,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "About us",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='/company/about-us']"
+    },
+    "position": {
+      "x": 637.5,
+      "y": 7974.75,
+      "width": 59.09375,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Careers",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='https://freepik-company.factorialhr.com/'][target='_blank'][rel='noreferrer noopener']"
+    },
+    "position": {
+      "x": 637.5,
+      "y": 8013.140625,
+      "width": 52.125,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Search trends",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='/tags']"
+    },
+    "position": {
+      "x": 637.5,
+      "y": 8051.53125,
+      "width": 92.421875,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Blog",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='https://www.freepik.com/blog/']"
+    },
+    "position": {
+      "x": 637.5,
+      "y": 8089.921875,
+      "width": 29.53125,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Events",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='/events'][target='_blank'][rel='noreferrer noopener']"
+    },
+    "position": {
+      "x": 637.5,
+      "y": 8128.3125,
+      "width": 44.28125,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Magnific",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='https://magnific.ai/'][target='_blank'][rel='noreferrer noopener nofollow']"
+    },
+    "position": {
+      "x": 637.5,
+      "y": 8166.703125,
+      "width": 57.328125,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Slidesgo",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='https://slidesgo.com/'][target='_blank'][rel='noreferrer noopener nofollow']"
+    },
+    "position": {
+      "x": 637.5,
+      "y": 8205.09375,
+      "width": 56.875,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Help center",
+    "selectors": {
+      "class": ".inline-block.text-sm.font-normal.leading-relaxed.text-surface-foreground-1.no-underline.sm:py-2.dark:text-surface-foreground-0",
+      "attributes": "a[href='/profile/support']"
+    },
+    "position": {
+      "x": 637.5,
+      "y": 8243.484375,
+      "width": 76.78125,
+      "height": 38.390625
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".flex.h-10.w-[18px].items-center.justify-center.text-surface-foreground-1",
+      "attributes": "a[href='https://www.facebook.com/Freepik'][target='_blank'][rel='nofollow noopener noreferrer']"
+    },
+    "position": {
+      "x": 898.25,
+      "y": 7992.75,
+      "width": 18,
+      "height": 40
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".flex.h-10.w-[18px].items-center.justify-center.text-surface-foreground-1",
+      "attributes": "a[href='https://x.com/freepik'][target='_blank'][rel='nofollow noopener noreferrer']"
+    },
+    "position": {
+      "x": 934.25,
+      "y": 7992.75,
+      "width": 18,
+      "height": 40
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".flex.h-10.w-[18px].items-center.justify-center.text-surface-foreground-1",
+      "attributes": "a[href='https://www.pinterest.es/freepik/'][target='_blank'][rel='nofollow noopener noreferrer']"
+    },
+    "position": {
+      "x": 970.25,
+      "y": 7992.75,
+      "width": 18,
+      "height": 40
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".flex.h-10.w-[18px].items-center.justify-center.text-surface-foreground-1",
+      "attributes": "a[href='https://www.instagram.com/freepik'][target='_blank'][rel='nofollow noopener noreferrer']"
+    },
+    "position": {
+      "x": 1006.25,
+      "y": 7992.75,
+      "width": 18,
+      "height": 40
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".flex.h-10.w-[18px].items-center.justify-center.text-surface-foreground-1",
+      "attributes": "a[href='https://www.youtube.com/channel/UC9wPXN2TIWoUamqONb7v8Pw'][target='_blank'][rel='nofollow noopener noreferrer']"
+    },
+    "position": {
+      "x": 898.25,
+      "y": 8040.75,
+      "width": 18,
+      "height": 40
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".flex.h-10.w-[18px].items-center.justify-center.text-surface-foreground-1",
+      "attributes": "a[href='https://www.linkedin.com/company/freepik-corp/'][target='_blank'][rel='nofollow noopener noreferrer']"
+    },
+    "position": {
+      "x": 934.25,
+      "y": 8040.75,
+      "width": 18,
+      "height": 40
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".flex.h-10.w-[18px].items-center.justify-center.text-surface-foreground-1",
+      "attributes": "a[href='https://discord.gg/a9etNXNmYY'][target='_blank'][rel='nofollow noopener noreferrer']"
+    },
+    "position": {
+      "x": 970.25,
+      "y": 8040.75,
+      "width": 18,
+      "height": 40
+    }
+  },
+  {
+    "tag": "a",
+    "text": "",
+    "selectors": {
+      "class": ".flex.h-10.w-[18px].items-center.justify-center.text-surface-foreground-1",
+      "attributes": "a[href='https://www.reddit.com/r/Freepik_AI/'][target='_blank'][rel='nofollow noopener noreferrer']"
+    },
+    "position": {
+      "x": 1006.25,
+      "y": 8040.75,
+      "width": 18,
+      "height": 40
+    }
+  },
+  {
+    "tag": "a",
+    "text": "\u010ce\u0161tina",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://cz.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Dansk",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://dk.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Deutsch",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://de.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "English",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://www.freepik.com/']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Espa\u00f1ol",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://www.freepik.es']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Suomi",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://fi.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Fran\u00e7ais",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://fr.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "\u0939\u093f\u0928\u094d\u0926\u0940",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://in.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Bahasa Indonesia",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://idn.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Italiano",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://it.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "\u65e5\u672c\u8a9e",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://jp.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "\ud55c\uad6d\uc5b4",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://kr.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Norsk bokm\u00e5l",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://no.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Nederlands",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://nl.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Polski",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://pl.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Portugu\u00eas",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://br.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "P\u0443\u0441\u0441\u043a\u0438\u0439",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://ru.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Svenska",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://se.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "\u0e20\u0e32\u0e29\u0e32\u0e44\u0e17\u0e22",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://th.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "T\u00fcrk\u00e7e",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://tr.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "Ti\u1ebfng Vi\u1ec7t",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://vn.freepik.com']"
+    }
+  },
+  {
+    "tag": "a",
+    "text": "\u7e41\u9ad4\u4e2d\u6587 (\u9999\u6e2f)",
+    "selectors": {
+      "class": ".block.cursor-pointer.bg-transparent.p-4.text-surface-foreground-0.no-underline.transition-all.duration-75.hover:bg-surface-3",
+      "attributes": "a[href='https://zh.freepik.com']"
+    }
+  },
+  {
+    "tag": "div",
+    "text": "",
+    "selectors": {
+      "class": ".flex.cursor-pointer.items-center.pl-7.pr-3",
+      "attributes": "div[role='button'][aria-label='Open autocomplete']"
+    },
+    "position": {
+      "x": 654.84375,
+      "y": 26.5,
+      "width": 55,
+      "height": 15
+    }
+  },
+  {
+    "tag": "div",
+    "text": "English\u010ce\u0161tinaDanskDeutschEnglishEspa\u00f1olSuomiFran\u00e7ais\u0939\u093f\u0928\u094d\u0926\u0940Bahasa IndonesiaItaliano\u65e5\u672c\u8a9e\ud55c\uad6d\uc5b4Norsk bokm\u00e5lNederlandsPolskiPortugu\u00easP\u0443\u0441\u0441\u043a\u0438\u0439Svenska\u0e20\u0e32\u0e29\u0e32\u0e44\u0e17\u0e22T\u00fcrk\u00e7eTi\u1ebfng Vi\u1ec7t\u7e41\u9ad4\u4e2d\u6587 (\u9999\u6e2f)",
+    "selectors": {
+      "attributes": "div[type='button'][aria-haspopup='dialog'][aria-expanded='false'][aria-controls='radix-:R3ir9kq6:'][data-state='closed'][role='button']"
+    },
+    "position": {
+      "x": 898.25,
+      "y": 8104.75,
+      "width": 139.921875,
+      "height": 44
+    }
+  }
+]
