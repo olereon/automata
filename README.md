@@ -11,6 +11,7 @@ A lightweight and fast web automation app for personal use, focusing on CLI-base
 - **NEW:** Flexible Targeting Modes - "all", "selector", and "auto" modes for element selection
 - **NEW:** CSS and XPath Selector Generation - Choose your preferred selector type
 - **NEW:** Credential Management - Securely manage and use credentials in workflows
+- **FIXED:** WebSocket Compatibility - Resolved MCP server WebSocket handler parameter mismatch issue
 - Support for multiple authentication methods
 - Workflow-based automation with JSON configuration
 - Robust element selection with fallback mechanisms
@@ -106,6 +107,25 @@ automata/
 ├── Makefile                 # Build commands
 └── setup.py                 # Package configuration
 ```
+
+## WebSocket Compatibility
+
+This project includes a comprehensive fix for WebSocket handler parameter compatibility issues with the websockets library version 15.0.1 and higher.
+
+### Issue Summary
+The MCP server implementation was affected by a breaking change in the websockets library that changed the handler signature from `handler(websocket, path)` to `handler(websocket)`. This caused a `TypeError` when trying to establish WebSocket connections.
+
+### Resolution
+- Fixed WebSocket handler parameter signature in `src/automata/mcp_server/server.py`
+- Updated dependency version constraints in `requirements.txt` to prevent incompatible versions
+- Enhanced error handling and logging for better debugging
+- Created comprehensive documentation for the fix
+
+### Documentation
+For detailed information about the WebSocket compatibility issue and its resolution, see:
+- [WebSocket Issue Resolution](playwright_mcp_websocket_issue_resolution.md)
+- [WebSocket Compatibility Guide](docs/websocket_compatibility_guide.md)
+- [WebSocket Fix Summary](websocket_fix_summary.md)
 
 ## Contributing
 

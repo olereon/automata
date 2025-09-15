@@ -45,6 +45,26 @@ If you can't find a solution to your problem here, please refer to the "Getting 
 2. Try installing the dependencies manually: `python3.11 -m pip install -r requirements.txt`.
 3. If you're still having issues, try creating a new virtual environment and installing the dependencies there.
 
+#### Issue: WebSocket handler parameter mismatch error
+
+**Problem**: When starting the MCP server, you encounter an error about WebSocket handler parameter mismatch, such as:
+```
+TypeError: websocket_handler() takes 2 positional arguments but 3 were given
+```
+
+**Solution**:
+This error is caused by a breaking change in the websockets library v15.0.1, which changed the handler signature from `handler(websocket, path)` to `handler(websocket)`.
+
+1. Check your websockets library version: `python3.11 -m pip show websockets`
+2. If you have version 15.0.1 or higher, downgrade to a compatible version: `python3.11 -m pip install "websockets>=10.0,<15.0"`
+3. The requirements.txt file has been updated to pin the websockets library version to prevent this issue
+4. If you need to use a newer version of the websockets library, you'll need to update the WebSocket handler code in `src/automata/mcp_server/server.py` to remove the path parameter
+
+For more details, see the comments in the WebSocket handler code in `src/automata/mcp_server/server.py` and the following documentation:
+- [WebSocket Issue Resolution](../playwright_mcp_websocket_issue_resolution.md)
+- [WebSocket Compatibility Guide](docs/websocket_compatibility_guide.md)
+- [WebSocket Fix Summary](../websocket_fix_summary.md)
+
 #### Issue: Playwright browsers not installing
 
 **Problem**: When running `python3.11 -m playwright install`, the browsers fail to install.

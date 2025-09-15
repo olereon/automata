@@ -26,6 +26,7 @@ The primary purpose of Automata is to provide users with a comprehensive solutio
 - **Wait Management**: Comprehensive wait utilities for handling dynamic content, including explicit waits and conditional waits.
 - **Error Handling**: Sophisticated error handling and recovery mechanisms, including retry logic and error logging.
 - **Session Management**: Persistent session handling, including cookies, localStorage, and sessionStorage management.
+- **WebSocket Compatibility**: Resolved MCP server WebSocket handler parameter mismatch issue with websockets library version 15.0.1 and higher.
 
 ### Authentication System
 - **Multiple Authentication Methods**: Support for form-based login, OAuth, cookie-based authentication, and custom authentication providers.
@@ -302,5 +303,16 @@ Additional authentication methods and security features:
 - Biometric authentication support
 - Multi-factor authentication automation
 - Enhanced security for credential storage
+
+### WebSocket Compatibility Fix
+A critical fix has been implemented to resolve WebSocket handler parameter compatibility issues with the websockets library version 15.0.1 and higher:
+
+- **Issue**: The MCP server implementation was affected by a breaking change in the websockets library that changed the handler signature from `handler(websocket, path)` to `handler(websocket)`, causing a `TypeError` when establishing WebSocket connections.
+- **Resolution**:
+  - Fixed WebSocket handler parameter signature in the MCP server
+  - Updated dependency version constraints to prevent incompatible versions
+  - Enhanced error handling and logging for better debugging
+  - Created comprehensive documentation for the fix
+- **Impact**: This fix ensures reliable WebSocket communication between the MCP client and server, which is essential for the proper functioning of the MCP Bridge extension and browser automation tools.
 
 These future enhancements would build upon the solid foundation established in the MVP, extending Automata's capabilities and addressing current limitations while maintaining its core strengths of flexibility, extensibility, and ease of use.

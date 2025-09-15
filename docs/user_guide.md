@@ -849,6 +849,66 @@ python3.11 -m automata session cleanup --encryption-key "my_secret_key"
 
 4. **Selectors not working**: Use the `helper generate-selectors` tool to verify selectors for your target elements.
 
+5. **WebSocket compatibility errors**: If you encounter errors related to WebSocket handler parameters, see the [WebSocket Library Compatibility Guide](docs/websocket_compatibility_guide.md) for detailed information and solutions.
+
+### WebSocket Compatibility Requirements
+
+This project includes a comprehensive fix for WebSocket handler parameter compatibility issues with the websockets library version 15.0.1 and higher.
+
+#### Understanding the Issue
+
+The MCP server implementation was affected by a breaking change in the websockets library that changed the handler signature from `handler(websocket, path)` to `handler(websocket)`. This caused a `TypeError` when trying to establish WebSocket connections.
+
+#### Error Symptoms
+
+If you encounter any of the following errors, it may be related to WebSocket compatibility issues:
+
+```
+TypeError: websocket_handler() takes 2 positional arguments but 3 were given
+TypeError: MCPServer.handle_websocket() missing 1 required positional argument: 'path'
+ERROR:websockets.server:connection handler failed
+```
+
+#### Solutions
+
+The project has been updated to handle these compatibility issues automatically. However, if you need to manually address the issue:
+
+1. **Check your websockets library version**:
+   ```bash
+   python3.11 -m pip show websockets
+   ```
+
+2. **If using version 15.0.1 or higher**, the code has been updated to work correctly.
+
+3. **If you need to downgrade** (not recommended as the fix is already implemented):
+   ```bash
+   python3.11 -m pip install "websockets>=10.0,<15.0"
+   ```
+
+#### Verification
+
+To verify that the WebSocket fix is working correctly:
+
+1. **Start the MCP server**:
+   ```bash
+   python3.11 scripts/start_mcp_server.py
+   ```
+
+2. **Run the test script**:
+   ```bash
+   python3.11 scripts/test_websocket_fix.py
+   ```
+
+3. **Check for successful connection establishment** and message handling.
+
+#### Additional Resources
+
+For more detailed information about the WebSocket compatibility issue and its resolution, see:
+
+- [WebSocket Issue Resolution](../playwright_mcp_websocket_issue_resolution.md)
+- [WebSocket Compatibility Guide](docs/websocket_compatibility_guide.md)
+- [WebSocket Fix Summary](../websocket_fix_summary.md)
+
 ### Debug Mode
 
 Enable verbose logging to troubleshoot issues:
