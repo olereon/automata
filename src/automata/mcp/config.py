@@ -27,6 +27,14 @@ class MCPConfiguration:
             "bridge": {
                 "extension_mode": False,
                 "extension_port": 9222
+            },
+            "bridge_extension": {
+                "extension_id": None,
+                "websocket_url": "ws://localhost:9222",
+                "connection_timeout": 30000,
+                "retry_attempts": 3,
+                "retry_delay": 1000,
+                "auth_token": None
             }
         }
 
@@ -70,6 +78,10 @@ class MCPConfiguration:
         """Enable or disable bridge extension mode."""
         self._config["bridge"]["extension_mode"] = enabled
 
+    def set_bridge_extension_mode(self, enabled: bool) -> None:
+        """Enable or disable bridge extension mode (alias for set_bridge_extension_enabled)."""
+        self.set_bridge_extension_enabled(enabled)
+
     def get_bridge_extension_port(self) -> int:
         """Get the bridge extension port."""
         return self._config["bridge"]["extension_port"]
@@ -77,6 +89,55 @@ class MCPConfiguration:
     def set_bridge_extension_port(self, port: int) -> None:
         """Set the bridge extension port."""
         self._config["bridge"]["extension_port"] = port
+
+    # Bridge Extension specific configuration methods
+    def get_bridge_extension_id(self) -> Optional[str]:
+        """Get the bridge extension ID."""
+        return self._config["bridge_extension"]["extension_id"]
+
+    def set_bridge_extension_id(self, extension_id: str) -> None:
+        """Set the bridge extension ID."""
+        self._config["bridge_extension"]["extension_id"] = extension_id
+
+    def get_bridge_extension_websocket_url(self) -> str:
+        """Get the bridge extension WebSocket URL."""
+        return self._config["bridge_extension"]["websocket_url"]
+
+    def set_bridge_extension_websocket_url(self, url: str) -> None:
+        """Set the bridge extension WebSocket URL."""
+        self._config["bridge_extension"]["websocket_url"] = url
+
+    def get_bridge_extension_connection_timeout(self) -> int:
+        """Get the bridge extension connection timeout in milliseconds."""
+        return self._config["bridge_extension"]["connection_timeout"]
+
+    def set_bridge_extension_connection_timeout(self, timeout: int) -> None:
+        """Set the bridge extension connection timeout in milliseconds."""
+        self._config["bridge_extension"]["connection_timeout"] = timeout
+
+    def get_bridge_extension_retry_attempts(self) -> int:
+        """Get the bridge extension retry attempts."""
+        return self._config["bridge_extension"]["retry_attempts"]
+
+    def set_bridge_extension_retry_attempts(self, attempts: int) -> None:
+        """Set the bridge extension retry attempts."""
+        self._config["bridge_extension"]["retry_attempts"] = attempts
+
+    def get_bridge_extension_retry_delay(self) -> int:
+        """Get the bridge extension retry delay in milliseconds."""
+        return self._config["bridge_extension"]["retry_delay"]
+
+    def set_bridge_extension_retry_delay(self, delay: int) -> None:
+        """Set the bridge extension retry delay in milliseconds."""
+        self._config["bridge_extension"]["retry_delay"] = delay
+
+    def get_bridge_extension_auth_token(self) -> Optional[str]:
+        """Get the bridge extension authentication token."""
+        return self._config["bridge_extension"]["auth_token"]
+
+    def set_bridge_extension_auth_token(self, token: str) -> None:
+        """Set the bridge extension authentication token."""
+        self._config["bridge_extension"]["auth_token"] = token
 
     def load_from_file(self, file_path: str) -> None:
         """
@@ -95,6 +156,9 @@ class MCPConfiguration:
             
             if "bridge" in config_data:
                 self._config["bridge"].update(config_data["bridge"])
+            
+            if "bridge_extension" in config_data:
+                self._config["bridge_extension"].update(config_data["bridge_extension"])
             
             logger.info(f"Loaded MCP configuration from: {file_path}")
         
@@ -145,6 +209,9 @@ class MCPConfiguration:
         
         if "bridge" in config_dict:
             self._config["bridge"].update(config_dict["bridge"])
+        
+        if "bridge_extension" in config_dict:
+            self._config["bridge_extension"].update(config_dict["bridge_extension"])
 
     @classmethod
     def load_default(cls) -> 'MCPConfiguration':

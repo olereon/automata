@@ -1,0 +1,9 @@
+# Chrome DevTools Protocol client
+pyppeteer>=1.0.2
+# Alternative CDP client
+cdp>=0.2.3
+# WebSocket client
+websockets>=10.0
+# Chrome extension communication
+chromedriver-binary-auto>=0.3.1
+selenium>=4.1.0

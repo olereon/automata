@@ -22,7 +22,7 @@ async def main():
     """Main function to run the MCP server."""
     parser = argparse.ArgumentParser(description='Start the MCP server')
     parser.add_argument('--host', default='localhost', help='Host to bind to')
-    parser.add_argument('--port', type=int, default=8081, help='Port to bind to')
+    parser.add_argument('--port', type=int, default=8080, help='Port to bind to')
     parser.add_argument('--log-level', default='INFO', help='Log level')
     
     args = parser.parse_args()

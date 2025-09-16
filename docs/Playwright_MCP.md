@@ -7,9 +7,13 @@ A Model Context Protocol (MCP) server that provides browser automation capabilit
 - **Fast and lightweight**. Uses Playwright's accessibility tree, not pixel-based input.
 - **LLM-friendly**. No vision models needed, operates purely on structured data.
 - **Deterministic tool application**. Avoids ambiguity common with screenshot-based approaches.
+- **WebSocket Compatible**. Fully compatible with the latest websockets library versions.
+- **Extension Support**. Connect to existing browser tabs with the Bridge extension.
 
 ### Requirements
+
 - Node.js 18 or newer
+- Python 3.11 or newer (for Automata integration)
 - VS Code, Cursor, Windsurf, Claude Desktop, Goose or any other MCP client
 
 <!--
@@ -151,7 +155,7 @@ Click <code>Save</code>.
 
 #### Click the button to install:
 
-[<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540playwright%252Fmcp%2540latest%2522%255D%257D) [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540playwright%252Fmcp%2540latest%2522%255D%257D)
+[<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540playwright%252Fmcp%2540latest%2522%255D%257D) [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode-dev/redirect?url=vscode-insiders%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540playwright%252Fmcp%2540latest%2522%255D%257D)
 
 #### Or install manually:
 
@@ -171,6 +175,120 @@ After installation, the Playwright MCP server will be available for use with you
 Follow Windsurf MCP [documentation](https://docs.windsurf.com/windsurf/cascade/mcp). Use the standard config above.
 
 </details>
+
+### Automata Integration
+
+The Automata web automation tool provides seamless integration with the Playwright MCP server, enabling AI assistants to interact with web pages through structured accessibility snapshots.
+
+#### Installation with Automata
+
+To use the Playwright MCP server with Automata, you can either:
+
+1. **Use the built-in MCP server**:
+   ```bash
+   python3.11 -m automata mcp-server start
+   ```
+
+2. **Use the standalone Playwright MCP server**:
+   ```bash
+   npx @playwright/mcp@latest
+   ```
+
+#### Configuration with Automata
+
+Automata provides a simplified configuration interface for the Playwright MCP server:
+
+```json
+{
+  "server": {
+    "host": "localhost",
+    "port": 8080
+  },
+  "browser": {
+    "browserName": "chromium",
+    "headless": false,
+    "launchOptions": {
+      "channel": "chrome"
+    },
+    "contextOptions": {
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      }
+    }
+  },
+  "capabilities": [
+    "tabs",
+    "pdf"
+  ],
+  "outputDir": "./output"
+}
+```
+
+#### Using Automata with MCP Server
+
+1. **Start the MCP server**:
+   ```bash
+   python3.11 -m automata mcp-server start --config mcp_config.json
+   ```
+
+2. **Configure your AI assistant** to use the MCP server:
+   ```json
+   {
+     "mcpServers": {
+       "automata": {
+         "command": "python3.11",
+         "args": [
+           "-m",
+           "automata",
+           "mcp-server",
+           "start",
+           "--config",
+           "mcp_config.json"
+         ]
+       }
+     }
+   }
+   ```
+
+3. **Interact with web pages** through your AI assistant using the MCP tools.
+
+#### Extension Mode Setup
+
+To connect to existing browser tabs:
+
+1. **Start the MCP server in extension mode**:
+   ```bash
+   python3.11 -m automata mcp-server start --extension
+   ```
+
+2. **Configure your AI assistant**:
+   ```json
+   {
+     "mcpServers": {
+       "automata-extension": {
+         "command": "python3.11",
+         "args": [
+           "-m",
+           "automata",
+           "mcp-server",
+           "start",
+           "--extension"
+         ]
+       }
+     }
+   }
+   ```
+
+3. **Install the Bridge extension**:
+   - Download the latest Chrome extension from: https://github.com/microsoft/playwright-mcp/releases
+   - Open Chrome and navigate to `chrome://extensions/`
+   - Enable "Developer mode"
+   - Click "Load unpacked" and select the extension directory
+
+#### WebSocket Compatibility
+
+The Automata MCP server implementation includes comprehensive fixes for WebSocket handler parameter compatibility issues with the websockets library version 15.0.1 and higher. This ensures seamless communication between the MCP server and AI assistants.
 
 ### Configuration
 
@@ -361,7 +479,7 @@ npx @playwright/mcp@latest --config path/to/config.json
 
     // List of origins to block the browser to request. Origins matching both `allowedOrigins` and `blockedOrigins` will be blocked.
     blockedOrigins?: string[];
-  };
+  },
  
   /**
    * Whether to send image responses to the client. Can be "allow" or "omit". 
@@ -789,3 +907,91 @@ http.createServer(async (req, res) => {
 
 
 <!--- End of tools generated section -->
+
+### Troubleshooting
+
+#### WebSocket Compatibility Issues
+
+The Automata MCP server implementation includes comprehensive fixes for WebSocket handler parameter compatibility issues with the websockets library version 15.0.1 and higher.
+
+**Error Symptoms**:
+```
+TypeError: websocket_handler() takes 2 positional arguments but 3 were given
+TypeError: MCPServer.handle_websocket() missing 1 required positional argument: 'path'
+ERROR:websockets.server:connection handler failed
+```
+
+**Solutions**:
+1. **Check your websockets library version**:
+   ```bash
+   python3.11 -m pip show websockets
+   ```
+
+2. **If using version 15.0.1 or higher**, the code has been updated to work correctly.
+
+3. **If you need to downgrade** (not recommended as the fix is already implemented):
+   ```bash
+   python3.11 -m pip install "websockets>=10.0,<15.0"
+   ```
+
+**Verification**:
+1. **Start the MCP server**:
+   ```bash
+   python3.11 scripts/start_mcp_server.py
+   ```
+
+2. **Run the test script**:
+   ```bash
+   python3.11 scripts/test_websocket_fix.py
+   ```
+
+3. **Check for successful connection establishment** and message handling.
+
+For more detailed information about the WebSocket compatibility issue and its resolution, see:
+- [WebSocket Issue Resolution](../playwright_mcp_websocket_issue_resolution.md)
+- [WebSocket Compatibility Guide](docs/websocket_compatibility_guide.md)
+- [WebSocket Fix Summary](../websocket_fix_summary.md)
+
+#### Extension Mode Issues
+
+If you encounter issues with the extension mode:
+
+1. **Ensure the Bridge extension is installed correctly**:
+   - Download the latest Chrome extension from: https://github.com/microsoft/playwright-mcp/releases
+   - Open Chrome and navigate to `chrome://extensions/`
+   - Enable "Developer mode"
+   - Click "Load unpacked" and select the extension directory
+
+2. **Check if the extension is enabled**:
+   - The extension should appear in the Chrome extensions list
+   - Make sure the "Enabled" toggle is on
+
+3. **Verify the extension is connected**:
+   - Start the MCP server in extension mode
+   - Check the server logs for connection messages
+
+#### Server Connection Issues
+
+If you encounter issues connecting to the MCP server:
+
+1. **Check if the server is running**:
+   ```bash
+   python3.11 -m automata mcp-server status
+   ```
+
+2. **Verify the server configuration**:
+   ```bash
+   python3.11 -m automata mcp-server config --show
+   ```
+
+3. **Check network connectivity**:
+   ```bash
+   curl http://localhost:8080/health
+   ```
+
+4. **Enable verbose logging**:
+   ```bash
+   python3.11 -m automata mcp-server start --verbose
+   ```
+
+For more detailed troubleshooting information, see the [MCP Bridge Setup and Troubleshooting Guide](mcp/bridge_setup_and_troubleshooting.md).

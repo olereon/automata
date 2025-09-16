@@ -4,35 +4,41 @@
 1. [Introduction](#introduction)
 2. [Installation](#installation)
 3. [Getting Started](#getting-started)
-4. [Workflows](#workflows)
+4. [MCP Server Integration](#mcp-server-integration)
+   - [Overview](#overview)
+   - [Setup](#setup)
+   - [Configuration](#configuration)
+   - [Usage](#usage)
+5. [Workflows](#workflows)
    - [Creating Workflows](#creating-workflows)
    - [Executing Workflows](#executing-workflows)
    - [Validating Workflows](#validating-workflows)
    - [Editing Workflows](#editing-workflows)
-5. [Templates](#templates)
+6. [Templates](#templates)
    - [Creating Templates](#creating-templates)
    - [Using Templates](#using-templates)
    - [Managing Templates](#managing-templates)
-6. [Session Management](#session-management)
+7. [Session Management](#session-management)
    - [Saving Sessions](#saving-sessions)
    - [Restoring Sessions](#restoring-sessions)
    - [Listing Sessions](#listing-sessions)
    - [Deleting Sessions](#deleting-sessions)
    - [Session Encryption](#session-encryption)
-7. [Helper Tools](#helper-tools)
+8. [Helper Tools](#helper-tools)
    - [HTML Parsing](#html-parsing)
    - [Selector Generation](#selector-generation)
    - [Action Building](#action-building)
-8. [Browser Exploration](#browser-exploration)
-9. [Configuration](#configuration)
-10. [Authentication](#authentication)
-11. [Examples](#examples)
+9. [Browser Exploration](#browser-exploration)
+10. [Configuration](#configuration)
+11. [Authentication](#authentication)
+12. [Examples](#examples)
     - [Simple Login Workflow](#simple-login-workflow)
     - [Session Management Example](#session-management-example)
+    - [MCP Server Example](#mcp-server-example)
 
 ## Introduction
 
-The Web Automation Tool is a powerful CLI-based application for automating web interactions, including form filling, data extraction, and web scraping. It provides a comprehensive set of features for creating, managing, and executing web automation workflows.
+The Web Automation Tool is a powerful CLI-based application for automating web interactions, including form filling, data extraction, and web scraping. It provides a comprehensive set of features for creating, managing, and executing web automation workflows. With the new MCP (Model Context Protocol) server integration, AI assistants can now interact with web pages through structured accessibility snapshots, providing a powerful bridge between AI capabilities and browser automation.
 
 ## Installation
 
@@ -40,6 +46,7 @@ The Web Automation Tool is a powerful CLI-based application for automating web i
 
 - Python 3.11 or higher
 - pip (Python package manager)
+- Node.js 18 or newer (for MCP server)
 
 ### Install from Source
 
@@ -78,6 +85,250 @@ python3.11 -m automata config init
 ```
 
 This creates a configuration file at `~/.automata/config.json` with default settings.
+
+## MCP Server Integration
+
+### Overview
+
+The MCP (Model Context Protocol) server integration enables AI assistants to interact with web pages through structured accessibility snapshots. This integration provides a powerful bridge between AI capabilities and browser automation, allowing AI assistants to perform web automation tasks with precision and reliability.
+
+### Key Features
+
+- **Fast and lightweight**: Uses Playwright's accessibility tree, not pixel-based input
+- **LLM-friendly**: No vision models needed, operates purely on structured data
+- **Deterministic tool application**: Avoids ambiguity common with screenshot-based approaches
+- **WebSocket Compatible**: Fully compatible with the latest websockets library versions
+- **Extension Support**: Connect to existing browser tabs with the Bridge extension
+
+### Setup
+
+#### 1. Install the Playwright MCP Server
+
+Install the Playwright MCP server with your preferred MCP client:
+
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}
+```
+
+#### 2. Extension Mode Setup (Optional)
+
+To connect to existing browser tabs:
+
+```json
+{
+  "mcpServers": {
+    "playwright-extension": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--extension"
+      ]
+    }
+  }
+}
+```
+
+#### 3. Install the Bridge Extension (for Extension Mode)
+
+1. Download the latest Chrome extension from: https://github.com/microsoft/playwright-mcp/releases
+2. Open Chrome and navigate to `chrome://extensions/`
+3. Enable "Developer mode"
+4. Click "Load unpacked" and select the extension directory
+
+### Configuration
+
+#### Command Line Configuration
+
+```bash
+# Start MCP server with default settings
+python3.11 -m automata mcp-server start
+
+# Start MCP server with custom configuration
+python3.11 -m automata mcp-server start --config path/to/config.json
+
+# Start MCP server in extension mode
+python3.11 -m automata mcp-server start --extension
+```
+
+#### Configuration File
+
+Create a JSON configuration file for the MCP server:
+
+```json
+{
+  "server": {
+    "host": "localhost",
+    "port": 8080
+  },
+  "browser": {
+    "browserName": "chromium",
+    "headless": false,
+    "launchOptions": {
+      "channel": "chrome"
+    },
+    "contextOptions": {
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      }
+    }
+  },
+  "capabilities": [
+    "tabs",
+    "pdf"
+  ],
+  "outputDir": "./output"
+}
+```
+
+#### Configuration Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `server.host` | String | "localhost" | Host to bind the server to |
+| `server.port` | Integer | 8080 | Port to listen on |
+| `browser.browserName` | String | "chromium" | Browser to use (chromium, firefox, webkit) |
+| `browser.headless` | Boolean | false | Run in headless mode |
+| `browser.launchOptions` | Object | {} | Browser launch options |
+| `browser.contextOptions` | Object | {} | Browser context options |
+| `capabilities` | Array | [] | Additional capabilities to enable |
+| `outputDir` | String | "./output" | Directory for output files |
+
+### Usage
+
+#### Starting the MCP Server
+
+```bash
+# Start with default configuration
+python3.11 -m automata mcp-server start
+
+# Start with custom configuration file
+python3.11 -m automata mcp-server start --config my_config.json
+
+# Start in extension mode
+python3.11 -m automata mcp-server start --extension
+
+# Start in headless mode
+python3.11 -m automata mcp-server start --headless
+
+# Start with custom port
+python3.11 -m automata mcp-server start --port 9000
+```
+
+#### MCP Server Tools
+
+The MCP server provides a comprehensive set of tools for browser automation:
+
+1. **Core Automation Tools**
+   - `browser_click`: Perform click on a web page
+   - `browser_navigate`: Navigate to a URL
+   - `browser_type`: Type text into editable element
+   - `browser_snapshot`: Capture accessibility snapshot of the current page
+   - `browser_wait_for`: Wait for text to appear or disappear or a specified time to pass
+
+2. **Tab Management**
+   - `browser_tabs`: List, create, close, or select a browser tab
+
+3. **Form Interaction**
+   - `browser_fill_form`: Fill multiple form fields
+   - `browser_select_option`: Select an option in a dropdown
+   - `browser_file_upload`: Upload one or multiple files
+
+4. **Data Extraction**
+   - `browser_extract`: Extract data from web pages
+   - `browser_console_messages`: Returns all console messages
+   - `browser_network_requests`: List network requests
+
+5. **Verification Tools**
+   - `browser_verify_element_visible`: Verify element is visible on the page
+   - `browser_verify_text_visible`: Verify text is visible on the page
+   - `browser_verify_value`: Verify element value
+
+6. **Advanced Features**
+   - `browser_pdf_save`: Save page as PDF
+   - `browser_take_screenshot`: Take a screenshot of the current page
+   - `browser_evaluate`: Evaluate JavaScript expression on page or element
+
+#### Using MCP Server with AI Assistants
+
+1. **Configure your AI assistant** to use the MCP server:
+   - Add the server configuration to your AI assistant's MCP settings
+   - Use the standard configuration provided in the Setup section
+
+2. **Interact with web pages** through your AI assistant:
+   - Your AI assistant can now use the MCP server tools to interact with web pages
+   - The assistant will automatically take snapshots, understand the page structure, and perform actions
+
+3. **Example interactions**:
+   - "Navigate to https://example.com and fill out the login form"
+   - "Extract all product information from this e-commerce page"
+   - "Take a screenshot of the current page and save it as a PDF"
+
+#### MCP Server and Workflows Integration
+
+The MCP server can be integrated with Automata workflows:
+
+```json
+{
+  "name": "Workflow with MCP Server",
+  "version": "1.0.0",
+  "steps": [
+    {
+      "name": "Start MCP server",
+      "action": "execute_script",
+      "value": "python3.11 -m automata mcp-server start --port 8080 &"
+    },
+    {
+      "name": "Wait for server to start",
+      "action": "wait",
+      "value": 5
+    },
+    {
+      "name": "Navigate to page",
+      "action": "navigate",
+      "value": "https://example.com"
+    },
+    {
+      "name": "Extract data using MCP",
+      "action": "execute_script",
+      "value": "fetch('http://localhost:8080/api/snapshot').then(response => response.json()).then(data => console.log(data));"
+    },
+    {
+      "name": "Stop MCP server",
+      "action": "execute_script",
+      "value": "fetch('http://localhost:8080/api/stop').then(() => console.log('Server stopped'));"
+    }
+  ]
+}
+```
+
+#### Troubleshooting MCP Server
+
+1. **Server not starting**:
+   - Check if the port is already in use
+   - Verify the configuration file syntax
+   - Ensure all dependencies are installed
+
+2. **WebSocket connection issues**:
+   - Verify the websockets library version (15.0.1 or higher)
+   - Check firewall settings
+   - Ensure the server is running and accessible
+
+3. **Browser automation failures**:
+   - Check if the browser is installed and accessible
+   - Verify browser launch options
+   - Ensure the page is fully loaded before interacting with elements
+
+For detailed troubleshooting information, see the [MCP Bridge Setup and Troubleshooting Guide](mcp/bridge_setup_and_troubleshooting.md).
 
 ## Workflows
 
@@ -837,6 +1088,52 @@ python3.11 -m automata session restore secure_session --encryption-key "my_secre
 python3.11 -m automata session cleanup --encryption-key "my_secret_key"
 ```
 
+### MCP Server Example
+
+1. Start the MCP server:
+
+```bash
+python3.11 -m automata mcp-server start --config mcp_config.json
+```
+
+2. Create a workflow that uses the MCP server:
+
+```json
+{
+  "name": "MCP Server Example",
+  "version": "1.0.0",
+  "steps": [
+    {
+      "name": "Navigate to page",
+      "action": "navigate",
+      "value": "https://example.com"
+    },
+    {
+      "name": "Take snapshot using MCP",
+      "action": "execute_script",
+      "value": "fetch('http://localhost:8080/api/snapshot').then(response => response.json()).then(data => setVariable('page_snapshot', data));"
+    },
+    {
+      "name": "Extract data from snapshot",
+      "action": "execute_script",
+      "value": "const elements = page_snapshot.elements; const data = elements.map(el => ({ text: el.text, selector: el.selector })); setVariable('extracted_data', data);"
+    },
+    {
+      "name": "Save extracted data",
+      "action": "save",
+      "value": "extracted_data.json",
+      "data": "{{extracted_data}}"
+    }
+  ]
+}
+```
+
+3. Execute the workflow:
+
+```bash
+python3.11 -m automata workflow execute mcp_example.json
+```
+
 ## Troubleshooting
 
 ### Common Issues
@@ -850,6 +1147,8 @@ python3.11 -m automata session cleanup --encryption-key "my_secret_key"
 4. **Selectors not working**: Use the `helper generate-selectors` tool to verify selectors for your target elements.
 
 5. **WebSocket compatibility errors**: If you encounter errors related to WebSocket handler parameters, see the [WebSocket Library Compatibility Guide](docs/websocket_compatibility_guide.md) for detailed information and solutions.
+
+6. **MCP Server connection issues**: Ensure the server is running and accessible, check firewall settings, and verify the configuration.
 
 ### WebSocket Compatibility Requirements
 
@@ -917,6 +1216,29 @@ Enable verbose logging to troubleshoot issues:
 python3.11 -m automata --verbose workflow execute my_workflow.json
 ```
 
+### MCP Server Debugging
+
+To troubleshoot MCP server issues:
+
+1. **Enable verbose logging**:
+   ```bash
+   python3.11 -m automata mcp-server start --verbose
+   ```
+
+2. **Check server status**:
+   ```bash
+   curl http://localhost:8080/health
+   ```
+
+3. **Test WebSocket connection**:
+   ```bash
+   python3.11 scripts/test_websocket_fix.py
+   ```
+
+4. **Check browser compatibility**:
+   - Ensure the browser is supported (Chrome, Firefox, WebKit)
+   - Verify the browser is installed and accessible
+
 ## Advanced Usage
 
 ### Custom Session Directory
@@ -934,3 +1256,45 @@ python3.11 -m automata session save my_session_id --expiry 7  # Expires in 7 day
 ### Session Metadata
 
 Sessions include metadata such as creation time, expiry date, and version information. You can view this metadata using the `session info` command.
+
+### MCP Server Advanced Configuration
+
+The MCP server supports advanced configuration options:
+
+1. **Browser Selection**:
+   ```json
+   {
+     "browser": {
+       "browserName": "firefox"
+     }
+   }
+   ```
+
+2. **Custom Capabilities**:
+   ```json
+   {
+     "capabilities": ["tabs", "pdf", "vision"]
+   }
+   ```
+
+3. **Network Configuration**:
+   ```json
+   {
+     "network": {
+       "allowedOrigins": ["https://example.com"],
+       "blockedOrigins": ["https://ads.example.com"]
+     }
+   }
+   ```
+
+4. **Security Settings**:
+   ```json
+   {
+     "security": {
+       "ignoreHTTPSErrors": true,
+       "blockServiceWorkers": true
+     }
+   }
+   ```
+
+For detailed information about MCP server configuration, see [docs/Playwright_MCP.md](Playwright_MCP.md) and [docs/Playwright_MCP_Bridge_Extension_Guide.md](Playwright_MCP_Bridge_Extension_Guide.md).

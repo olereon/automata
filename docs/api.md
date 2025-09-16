@@ -23,11 +23,18 @@
   - [WorkflowValidator](#workflowvalidator)
   - [WorkflowExecutor](#workflowexecutor)
   - [WorkflowTemplate](#workflowtemplate)
+- [MCP Server](#mcp-server)
+  - [MCPServer](#mcpserver)
+  - [MCPProtocol](#mcpprotocol)
+  - [MCPTools](#mcp-tools)
+  - [MCPBrowserManager](#mcpbrowsermanager)
+  - [MCPWebSocketHandler](#mcpwebsockethandler)
 - [CLI Interface](#cli-interface)
   - [CLI](#cli)
   - [WorkflowCommands](#workflowcommands)
   - [TemplateCommands](#templatecommands)
   - [HelperCommands](#helpercommands)
+  - [MCPCommands](#mcpcommands)
 - [Examples](#examples)
 
 ## Introduction
@@ -40,6 +47,7 @@ The API is organized into several modules:
 - Authentication System: Handles authentication and session management
 - Helper Tools: Utilities for parsing HTML, generating selectors, and building actions
 - Workflow System: Manages workflow creation, validation, and execution
+- MCP Server: Provides Model Context Protocol server functionality for AI assistant integration
 - CLI Interface: Provides command-line interface for interacting with Automata
 
 ## Core Engine
@@ -945,6 +953,213 @@ login_workflow = template_manager.use_template(
 )
 ```
 
+## MCP Server
+
+### MCPServer
+
+The `MCPServer` class implements the Model Context Protocol server for AI assistant integration.
+
+#### Methods
+
+- `__init__(config=None)`: Initialize the MCP server with optional configuration.
+- `start()`: Start the MCP server.
+- `stop()`: Stop the MCP server.
+- `get_config()`: Get the current server configuration.
+- `set_config(config)`: Set the server configuration.
+- `get_browser_manager()`: Get the browser manager instance.
+- `get_capabilities()`: Get the server capabilities.
+- `register_tool(name, tool)`: Register a tool with the server.
+- `unregister_tool(name)`: Unregister a tool from the server.
+- `list_tools()`: List all registered tools.
+- `handle_request(request)`: Handle an incoming request from an AI assistant.
+- `send_response(response)`: Send a response to an AI assistant.
+- `create_accessibility_snapshot()`: Create an accessibility snapshot of the current page.
+- `execute_tool_call(tool_name, params)`: Execute a tool call.
+
+#### Example
+
+```python
+from src.automata.mcp_server import MCPServer
+
+# Create an MCP server instance
+server = MCPServer({
+    "server": {
+        "host": "localhost",
+        "port": 8080
+    },
+    "browser": {
+        "browserName": "chromium",
+        "headless": false
+    }
+})
+
+# Start the server
+server.start()
+
+# Stop the server
+server.stop()
+```
+
+### MCPProtocol
+
+The `MCPProtocol` class implements the Model Context Protocol for communication with AI assistants.
+
+#### Methods
+
+- `__init__(server)`: Initialize the MCP protocol with an MCP server instance.
+- `parse_message(message)`: Parse an incoming message.
+- `create_response(request_id, result)`: Create a response message.
+- `create_error_response(request_id, error)`: Create an error response message.
+- `create_notification(method, params)`: Create a notification message.
+- `handle_message(message)`: Handle an incoming message.
+- `send_message(message)`: Send a message to the AI assistant.
+- `initialize(request_id, params)`: Handle an initialize request.
+- `list_tools(request_id, params)`: Handle a list_tools request.
+- `call_tool(request_id, params)`: Handle a call_tool request.
+
+#### Example
+
+```python
+from src.automata.mcp_server import MCPServer, MCPProtocol
+
+# Create an MCP server instance
+server = MCPServer()
+
+# Create an MCP protocol instance
+protocol = MCPProtocol(server)
+
+# Handle a message
+message = '{"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}}'
+response = protocol.handle_message(message)
+
+# Send a response
+protocol.send_message(response)
+```
+
+### MCPTools
+
+The `MCPTools` class provides tools for browser automation through the MCP server.
+
+#### Methods
+
+- `__init__(server)`: Initialize the MCP tools with an MCP server instance.
+- `register_default_tools()`: Register the default set of tools.
+- `browser_navigate(params)`: Navigate to a URL.
+- `browser_click(params)`: Click on an element.
+- `browser_type(params)`: Type text into an element.
+- `browser_snapshot(params)`: Create an accessibility snapshot.
+- `browser_wait_for(params)`: Wait for a condition.
+- `browser_tabs(params)`: Manage browser tabs.
+- `browser_fill_form(params)`: Fill a form.
+- `browser_select_option(params)`: Select an option in a dropdown.
+- `browser_file_upload(params)`: Upload files.
+- `browser_extract(params)`: Extract data from the page.
+- `browser_console_messages(params)`: Get console messages.
+- `browser_network_requests(params)`: Get network requests.
+- `browser_verify_element_visible(params)`: Verify element visibility.
+- `browser_verify_text_visible(params)`: Verify text visibility.
+- `browser_verify_value(params)`: Verify element value.
+- `browser_pdf_save(params)`: Save page as PDF.
+- `browser_take_screenshot(params)`: Take a screenshot.
+- `browser_evaluate(params)`: Evaluate JavaScript.
+
+#### Example
+
+```python
+from src.automata.mcp_server import MCPServer, MCPTools
+
+# Create an MCP server instance
+server = MCPServer()
+
+# Create MCP tools instance
+tools = MCPTools(server)
+
+# Register default tools
+tools.register_default_tools()
+
+# Execute a tool
+result = tools.browser_navigate({
+    "url": "https://example.com"
+})
+```
+
+### MCPBrowserManager
+
+The `MCPBrowserManager` class manages browser instances for the MCP server.
+
+#### Methods
+
+- `__init__(config)`: Initialize the MCP browser manager with configuration.
+- `start_browser()`: Start the browser instance.
+- `stop_browser()`: Stop the browser instance.
+- `get_page()`: Get the current page instance.
+- `new_page()`: Create a new page/tab.
+- `switch_to_page(index)`: Switch to a specific page/tab.
+- `close_page(index)`: Close a specific page/tab.
+- `create_accessibility_snapshot()`: Create an accessibility snapshot of the current page.
+- `get_browser_info()`: Get information about the browser instance.
+- `get_page_info()`: Get information about the current page.
+
+#### Example
+
+```python
+from src.automata.mcp_server import MCPBrowserManager
+
+# Create an MCP browser manager instance
+browser_manager = MCPBrowserManager({
+    "browserName": "chromium",
+    "headless": false
+})
+
+# Start the browser
+browser_manager.start_browser()
+
+# Navigate to a page
+page = browser_manager.get_page()
+page.goto("https://example.com")
+
+# Create an accessibility snapshot
+snapshot = browser_manager.create_accessibility_snapshot()
+
+# Stop the browser
+browser_manager.stop_browser()
+```
+
+### MCPWebSocketHandler
+
+The `MCPWebSocketHandler` class handles WebSocket connections for the MCP server.
+
+#### Methods
+
+- `__init__(server)`: Initialize the WebSocket handler with an MCP server instance.
+- `register_handler(websocket)`: Register a new WebSocket connection.
+- `unregister_handler(websocket)`: Unregister a WebSocket connection.
+- `handle_message(websocket, message)`: Handle an incoming WebSocket message.
+- `send_message(websocket, message)`: Send a message to a WebSocket client.
+- `broadcast_message(message)`: Broadcast a message to all connected clients.
+- `get_connected_clients()`: Get a list of connected WebSocket clients.
+
+#### Example
+
+```python
+from src.automata.mcp_server import MCPServer, MCPWebSocketHandler
+
+# Create an MCP server instance
+server = MCPServer()
+
+# Create a WebSocket handler instance
+ws_handler = MCPWebSocketHandler(server)
+
+# Handle a WebSocket connection
+async def handle_connection(websocket, path):
+    ws_handler.register_handler(websocket)
+    try:
+        async for message in websocket:
+            ws_handler.handle_message(websocket, message)
+    finally:
+        ws_handler.unregister_handler(websocket)
+```
+
 ## CLI Interface
 
 ### CLI
@@ -1091,6 +1306,41 @@ helper_commands.register_commands()
 cli.run()
 ```
 
+### MCPCommands
+
+The `MCPCommands` class provides commands for managing the MCP server.
+
+#### Methods
+
+- `__init__(cli)`: Initialize the MCP commands with a CLI instance.
+- `register_commands()`: Register all MCP commands with the CLI.
+- `start_server(args)`: Start the MCP server.
+- `stop_server(args)`: Stop the MCP server.
+- `restart_server(args)`: Restart the MCP server.
+- `server_status(args)`: Get the status of the MCP server.
+- `server_config(args)`: Configure the MCP server.
+- `list_tools(args)`: List all available MCP tools.
+- `test_connection(args)`: Test the connection to the MCP server.
+
+#### Example
+
+```python
+from src.automata.cli import CLI
+from src.automata.cli.commands import MCPCommands
+
+# Create a CLI instance
+cli = CLI()
+
+# Create MCP commands
+mcp_commands = MCPCommands(cli)
+
+# Register the commands
+mcp_commands.register_commands()
+
+# Run the CLI
+cli.run()
+```
+
 ## Examples
 
 ### Example 1: Simple Web Scraping
@@ -1154,7 +1404,75 @@ results = executor.execute_workflow(workflow)
 engine.stop()
 ```
 
-### Example 2: Form Submission
+### Example 2: MCP Server Integration
+
+```python
+from src.automata.mcp_server import MCPServer
+
+# Create an MCP server instance
+server = MCPServer({
+    "server": {
+        "host": "localhost",
+        "port": 8080
+    },
+    "browser": {
+        "browserName": "chromium",
+        "headless": false
+    }
+})
+
+# Start the server
+server.start()
+
+# The server is now running and can accept connections from AI assistants
+# AI assistants can use the MCP tools to interact with web pages
+
+# Stop the server
+server.stop()
+```
+
+### Example 3: Using MCP Tools Programmatically
+
+```python
+from src.automata.mcp_server import MCPServer, MCPTools
+
+# Create an MCP server instance
+server = MCPServer()
+
+# Create MCP tools instance
+tools = MCPTools(server)
+
+# Register default tools
+tools.register_default_tools()
+
+# Start the server
+server.start()
+
+# Use the tools programmatically
+# Navigate to a page
+tools.browser_navigate({
+    "url": "https://example.com"
+})
+
+# Take a snapshot
+snapshot = tools.browser_snapshot({})
+
+# Click on an element
+tools.browser_click({
+    "selector": "#submit-button"
+})
+
+# Extract data
+data = tools.browser_extract({
+    "selector": ".item",
+    "properties": ["text", "href"]
+})
+
+# Stop the server
+server.stop()
+```
+
+### Example 4: Form Submission
 
 ```python
 from src.automata.core import AutomationEngine
@@ -1245,7 +1563,7 @@ auth_manager.logout()
 engine.stop()
 ```
 
-### Example 3: Custom Authentication Provider
+### Example 5: Custom Authentication Provider
 
 ```python
 from src.automata.core import AutomationEngine
@@ -1348,196 +1666,67 @@ auth_manager.logout()
 engine.stop()
 ```
 
-### Example 4: Conditional Workflow
+### Example 6: MCP Server with Custom Tools
 
 ```python
-from src.automata.core import AutomationEngine
-from src.automata.workflow import WorkflowBuilder, WorkflowExecutor
+from src.automata.mcp_server import MCPServer, MCPTools
 
-# Create an automation engine instance
-engine = AutomationEngine()
-engine.start()
+# Define a custom tool
+def custom_tool(params):
+    """
+    A custom tool that performs a specific action.
+    
+    Args:
+        params (dict): Tool parameters
+        
+    Returns:
+        dict: Tool result
+    """
+    # Custom tool implementation
+    return {
+        "status": "success",
+        "message": "Custom tool executed successfully",
+        "data": params
+    }
 
-# Create a workflow builder instance
-builder = WorkflowBuilder()
+# Create an MCP server instance
+server = MCPServer()
 
-# Build a workflow
-workflow = builder.build_workflow(
-    name="Conditional Workflow",
-    "version": "1.0.0",
-    description="A workflow with conditional logic",
-    variables={
-        "url": "https://example.com",
-        "output_file": "data.json"
-    },
-    steps=[
-        {
-            "name": "Navigate to page",
-            "action": "navigate",
-            "value": "{{url}}"
-        },
-        {
-            "name": "Wait for page to load",
-            "action": "wait_for",
-            "selector": "body",
-            "timeout": 10
-        },
-        {
-            "name": "Check if premium content is available",
-            "action": "evaluate",
-            "value": "document.querySelector('.premium-content') !== null"
-        },
-        {
-            "name": "Process based on content availability",
-            "action": "if",
-            "value": {
-                "operator": "equals",
-                "left": "{{evaluate}}",
-                "right": true
+# Create MCP tools instance
+tools = MCPTools(server)
+
+# Register default tools
+tools.register_default_tools()
+
+# Register custom tool
+server.register_tool("custom_tool", {
+    "name": "custom_tool",
+    "description": "A custom tool for specific actions",
+    "function": custom_tool,
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "param1": {
+                "type": "string",
+                "description": "First parameter"
             },
-            "steps": [
-                {
-                    "name": "Extract premium content",
-                    "action": "extract",
-                    "selector": ".premium-content",
-                    "value": {
-                        "title": ".title",
-                        "content": ".content"
-                    }
-                },
-                {
-                    "name": "Set content type",
-                    "action": "set_variable",
-                    "selector": "content_type",
-                    "value": "premium"
-                }
-            ],
-            "else_steps": [
-                {
-                    "name": "Extract standard content",
-                    "action": "extract",
-                    "selector": ".standard-content",
-                    "value": {
-                        "title": ".title",
-                        "content": ".content"
-                    }
-                },
-                {
-                    "name": "Set content type",
-                    "action": "set_variable",
-                    "selector": "content_type",
-                    "value": "standard"
-                }
-            ]
-        },
-        {
-            "name": "Create result object",
-            "action": "execute_script",
-            "value": "result = { content_type: content_type, data: content_type === 'premium' ? extract_premium_content : extract_standard_content }; set_variable('result', result);"
-        },
-        {
-            "name": "Save results",
-            "action": "save",
-            "value": "{{output_file}}",
-            "data": "{{result}}"
-        }
-    ]
-)
-
-# Create a workflow executor instance
-executor = WorkflowExecutor(engine)
-
-# Execute the workflow
-results = executor.execute_workflow(workflow)
-
-# Stop the engine
-engine.stop()
-```
-
-### Example 5: Loop-Based Workflow
-
-```python
-from src.automata.core import AutomationEngine
-from src.automata.workflow import WorkflowBuilder, WorkflowExecutor
-
-# Create an automation engine instance
-engine = AutomationEngine()
-engine.start()
-
-# Create a workflow builder instance
-builder = WorkflowBuilder()
-
-# Build a workflow
-workflow = builder.build_workflow(
-    name="Loop-Based Workflow",
-    "version": "1.0.0",
-    description="A workflow with loops",
-    variables={
-        "base_url": "https://example.com",
-        "output_file": "data.json",
-        "pages": [1, 2, 3],
-        "results": []
-    },
-    steps=[
-        {
-            "name": "Initialize results",
-            "action": "set_variable",
-            "selector": "results",
-            "value": []
-        },
-        {
-            "name": "Loop through pages",
-            "action": "loop",
-            "value": {
-                "type": "for_each",
-                "items": "{{pages}}",
-                "variable": "page",
-                "steps": [
-                    {
-                        "name": "Navigate to page",
-                        "action": "navigate",
-                        "value": "{{base_url}}?page={{page}}"
-                    },
-                    {
-                        "name": "Wait for content to load",
-                        "action": "wait_for",
-                        "selector": ".content",
-                        "timeout": 10
-                    },
-                    {
-                        "name": "Extract data",
-                        "action": "extract",
-                        "selector": ".item",
-                        "value": {
-                            "title": ".title",
-                            "description": ".description"
-                        }
-                    },
-                    {
-                        "name": "Add to results",
-                        "action": "execute_script",
-                        "value": "results = results + extract_data; set_variable('results', results);"
-                    }
-                ]
+            "param2": {
+                "type": "integer",
+                "description": "Second parameter"
             }
         },
-        {
-            "name": "Save results",
-            "action": "save",
-            "value": "{{output_file}}",
-            "data": "{{results}}"
-        }
-    ]
-)
+        "required": ["param1"]
+    }
+})
 
-# Create a workflow executor instance
-executor = WorkflowExecutor(engine)
+# Start the server
+server.start()
 
-# Execute the workflow
-results = executor.execute_workflow(workflow)
+# The server is now running with the custom tool available
+# AI assistants can call the custom tool with appropriate parameters
 
-# Stop the engine
-engine.stop()
+# Stop the server
+server.stop()
 ```
 
 This concludes the API documentation for Automata. For more information on using Automata, refer to the user guide and workflow examples.

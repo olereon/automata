@@ -1,0 +1,30 @@
+{
+  "commands": [
+    {
+      "type": "navigate",
+      "url": "https://example.com"
+    },
+    {
+      "type": "wait_for_navigation",
+      "timeout": 10000
+    },
+    {
+      "type": "wait_for_selector",
+      "selector": "h1",
+      "timeout": 5000
+    },
+    {
+      "type": "get_title"
+    },
+    {
+      "type": "get_url"
+    },
+    {
+      "type": "screenshot",
+      "path": "/tmp/example_screenshot.png"
+    },
+    {
+      "type": "snapshot"
+    }
+  ]
+}

@@ -89,3 +89,4 @@
 [x] Integrate MCP Bridge with existing BrowserManager
 [x] Add MCP Bridge options to CLI interface
 [x] Create MCP Bridge test and configuration commands
+  - [x] Implement extension mode for browser automation

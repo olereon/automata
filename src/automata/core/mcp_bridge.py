@@ -9,6 +9,7 @@ from typing import Dict, Any, List, Optional, Union
 from ..core.logger import get_logger
 from .mcp_client import MCPClient, MCPConnectionError, MCPToolError
 from ..mcp.config import MCPConfiguration
+from .connection_error_handler import ConnectionError, ConnectionErrorContext
 
 logger = get_logger(__name__)
 
@@ -20,7 +21,9 @@ class MCPBridgeError(Exception):
 
 class MCPBridgeConnectionError(MCPBridgeError):
     """Exception raised when MCP Bridge connection fails."""
-    pass
+    def __init__(self, message: str, context: Optional[ConnectionErrorContext] = None):
+        super().__init__(message)
+        self.context = context
 
 
 class MCPBridgeTabError(MCPBridgeError):
@@ -83,16 +86,22 @@ class MCPBridgeConnector:
         # Connection state
         self._connected = False
 
-    async def connect(self) -> None:
+    async def connect(self, test_mode: bool = False) -> bool:
         """
         Connect to the MCP server and initialize the bridge.
         
+        Args:
+            test_mode: If True, don't fail if connection is unsuccessful
+            
+        Returns:
+            True if connection was successful, False otherwise
+            
         Raises:
-            MCPBridgeConnectionError: If connection fails
+            MCPBridgeConnectionError: If connection fails and not in test_mode
         """
         if self._connected:
             logger.warning("Already connected to MCP Bridge")
-            return
+            return True
 
         logger.info("Connecting to MCP Bridge")
 
@@ -124,11 +133,41 @@ class MCPBridgeConnector:
 
             self._connected = True
             logger.info("Successfully connected to MCP Bridge")
+            return True
 
         except Exception as e:
             logger.error(f"Failed to connect to MCP Bridge: {e}")
             await self.disconnect()
-            raise MCPBridgeConnectionError(f"Failed to connect to MCP Bridge: {e}")
+            
+            # Create a more detailed error message if we have connection error context
+            error_message = "Failed to connect to MCP Bridge"
+            context = None
+            
+            if isinstance(e, MCPConnectionError) and hasattr(e, 'context') and e.context:
+                context = e.context
+                error_message = (
+                    f"Failed to connect to MCP Bridge at {self.server_url}. "
+                    f"Error type: {context.error_type.value}. "
+                    f"Connection attempts: {context.connection_attempts}. "
+                    f"Last error: {context.error_message}. "
+                    f"Please check the server status and network connection."
+                )
+            elif isinstance(e, ConnectionError) and hasattr(e, 'context') and e.context:
+                context = e.context
+                error_message = (
+                    f"Failed to connect to MCP Bridge at {self.server_url}. "
+                    f"Error type: {context.error_type.value}. "
+                    f"Connection attempts: {context.connection_attempts}. "
+                    f"Last error: {context.error_message}. "
+                    f"Please check the server status and network connection."
+                )
+            else:
+                error_message = f"Failed to connect to MCP Bridge: {e}"
+            
+            if test_mode:
+                return False
+            else:
+                raise MCPBridgeConnectionError(error_message, context)
 
     async def disconnect(self) -> None:
         """

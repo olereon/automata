@@ -12,6 +12,8 @@ from playwright.async_api import Browser, BrowserContext, Page, Playwright, asyn
 from .logger import get_logger
 from ..mcp.config import MCPConfiguration
 from ..mcp.bridge import MCPBridgeConnector, MCPBridgeConnectionError
+from ..mcp_server.server import MCPServer
+from ..mcp_server.config import MCPServerConfig
 
 logger = get_logger(__name__)
 
@@ -24,8 +26,20 @@ class BrowserManager:
         headless: bool = True,
         browser_type: str = "chromium",
         use_mcp_bridge: bool = False,
-        mcp_config: Optional[MCPConfiguration] = None
+        mcp_config: Optional[MCPConfiguration] = None,
+        use_mcp_server: bool = False,
+        mcp_server_config: Optional[MCPServerConfig] = None
     ):
+        """Initialize browser manager.
+        
+        Args:
+            headless: Whether to run browser in headless mode
+            browser_type: Type of browser to use (chromium, firefox, webkit)
+            use_mcp_bridge: Whether to use MCP Bridge for browser automation
+            mcp_config: MCP configuration
+            use_mcp_server: Whether to use MCP Server for browser automation
+            mcp_server_config: MCP Server configuration
+        """
         """Initialize browser manager.
         
         Args:
@@ -38,7 +52,13 @@ class BrowserManager:
         self.browser_type = browser_type
         self.use_mcp_bridge = use_mcp_bridge
         self.mcp_config = mcp_config or MCPConfiguration.load_default()
+        
         self.mcp_bridge_test_mode = getattr(self, 'mcp_bridge_test_mode', False)
+        
+        # Set MCP server parameters
+        self.use_mcp_server = use_mcp_server
+        self.mcp_server_config = mcp_server_config or MCPServerConfig.load_default()
+        self.mcp_server = None
         
         self.playwright: Optional[Playwright] = None
         self.browser: Optional[Browser] = None
@@ -50,6 +70,7 @@ class BrowserManager:
         self.current_page_index = 0
 
     async def start(self):
+        """Start browser and MCP Bridge/MCP Server if enabled."""
         """Start browser and MCP Bridge if enabled."""
         logger.info(f"Starting browser (headless={self.headless}, type={self.browser_type})")
         
@@ -91,6 +112,13 @@ class BrowserManager:
                 await self.mcp_bridge.connect()
         
         logger.info("Browser started successfully")
+        
+        # Start MCP Server if enabled
+        if self.use_mcp_server:
+            logger.info("Starting MCP Server")
+            self.mcp_server = MCPServer(self.mcp_server_config)
+            await self.mcp_server.start()
+            logger.info("MCP Server started successfully")
 
     async def stop(self):
         """Stop browser and MCP Bridge if enabled."""
@@ -138,6 +166,13 @@ class BrowserManager:
         self.page = None
         
         logger.info("Browser stopped successfully")
+        
+        # Stop MCP Server if enabled
+        if self.use_mcp_server and self.mcp_server:
+            logger.info("Stopping MCP Server")
+            await self.mcp_server.stop()
+            self.mcp_server = None
+            logger.info("MCP Server stopped successfully")
 
     async def new_page(self, url: Optional[str] = None) -> Page:
         """Create new page.

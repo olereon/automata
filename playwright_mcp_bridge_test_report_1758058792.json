@@ -1,0 +1,79 @@
+{
+  "test_environment": {
+    "platform": "Linux",
+    "platform_version": "#1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025",
+    "architecture": "x86_64",
+    "python_version": "3.11.0rc1",
+    "config_file": null
+  },
+  "test_results": {
+    "connection_establishment": {
+      "success": false,
+      "details": [],
+      "errors": [
+        "Failed to connect to MCP Bridge extension: Failed to check MCP Bridge extension availability: Cannot connect to host localhost:9222 ssl:default [Connect call failed ('127.0.0.1', 9222)]"
+      ]
+    },
+    "tab_management": {
+      "success": false,
+      "details": [],
+      "errors": [
+        "Failed to connect to MCP Bridge extension: Failed to check MCP Bridge extension availability: Cannot connect to host localhost:9222 ssl:default [Connect call failed ('127.0.0.1', 9222)]"
+      ]
+    },
+    "navigation": {
+      "success": false,
+      "details": [],
+      "errors": [
+        "Failed to connect to MCP Bridge extension: Failed to check MCP Bridge extension availability: Cannot connect to host localhost:9222 ssl:default [Connect call failed ('127.0.0.1', 9222)]"
+      ]
+    },
+    "cookie_storage_management": {
+      "success": false,
+      "details": [],
+      "errors": [
+        "Failed to connect to MCP Bridge extension: Failed to check MCP Bridge extension availability: Cannot connect to host localhost:9222 ssl:default [Connect call failed ('127.0.0.1', 9222)]"
+      ]
+    },
+    "screenshot_functionality": {
+      "success": false,
+      "details": [],
+      "errors": [
+        "Failed to connect to MCP Bridge extension: Failed to check MCP Bridge extension availability: Cannot connect to host localhost:9222 ssl:default [Connect call failed ('127.0.0.1', 9222)]"
+      ]
+    },
+    "connection_handling_during_events": {
+      "success": false,
+      "details": [],
+      "errors": [
+        "Failed to connect to MCP Bridge extension: Failed to check MCP Bridge extension availability: Cannot connect to host localhost:9222 ssl:default [Connect call failed ('127.0.0.1', 9222)]"
+      ]
+    },
+    "reconnection_logic": {
+      "success": false,
+      "details": [],
+      "errors": [
+        "Failed to connect to MCP Bridge extension: Failed to check MCP Bridge extension availability: Cannot connect to host localhost:9222 ssl:default [Connect call failed ('127.0.0.1', 9222)]"
+      ]
+    },
+    "cross_platform_compatibility": {
+      "success": false,
+      "details": [
+        "Platform: Linux #1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025 x86_64",
+        "Platform config: {'platform': 'Linux', 'platform_version': '#1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025', 'architecture': 'x86_64', 'python_version': '3.11.0rc1', 'ssl_cert_file': '/etc/ssl/certs/ca-certificates.crt', 'websocket_library': 'websockets'}"
+      ],
+      "errors": [
+        "Failed to connect to MCP Bridge extension: Failed to check MCP Bridge extension availability: Cannot connect to host localhost:9222 ssl:default [Connect call failed ('127.0.0.1', 9222)]"
+      ]
+    }
+  },
+  "performance_metrics": {
+    "total_test_time": 0.029332399368286133
+  },
+  "summary": {
+    "total_tests": 8,
+    "passed_tests": 0,
+    "failed_tests": 8,
+    "success_rate": "0.00%"
+  }
+}

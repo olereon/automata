@@ -11,6 +11,7 @@ A lightweight and fast web automation app for personal use, focusing on CLI-base
 - **NEW:** Flexible Targeting Modes - "all", "selector", and "auto" modes for element selection
 - **NEW:** CSS and XPath Selector Generation - Choose your preferred selector type
 - **NEW:** Credential Management - Securely manage and use credentials in workflows
+- **NEW:** MCP Server Integration - Connect with AI assistants through Model Context Protocol
 - **FIXED:** WebSocket Compatibility - Resolved MCP server WebSocket handler parameter mismatch issue
 - Support for multiple authentication methods
 - Workflow-based automation with JSON configuration
@@ -24,6 +25,7 @@ A lightweight and fast web automation app for personal use, focusing on CLI-base
 
 - Python 3.11 or higher
 - Chromium browser (installed automatically by Playwright)
+- Node.js 18 or newer (for MCP server)
 
 ### Setup
 
@@ -43,6 +45,80 @@ A lightweight and fast web automation app for personal use, focusing on CLI-base
    venv/bin/python3.11 -m playwright install chromium
    ```
 
+## MCP Server Integration
+
+Automata now includes an MCP (Model Context Protocol) server that enables AI assistants to interact with web pages through structured accessibility snapshots. This integration provides a powerful bridge between AI assistants and browser automation capabilities.
+
+### Key Features
+
+- **Fast and lightweight**: Uses Playwright's accessibility tree, not pixel-based input
+- **LLM-friendly**: No vision models needed, operates purely on structured data
+- **Deterministic tool application**: Avoids ambiguity common with screenshot-based approaches
+- **WebSocket Compatible**: Fully compatible with the latest websockets library versions
+
+### Getting Started with MCP Server
+
+1. **Install the Playwright MCP server** with your preferred MCP client:
+
+   ```json
+   {
+     "mcpServers": {
+       "playwright": {
+         "command": "npx",
+         "args": [
+           "@playwright/mcp@latest"
+         ]
+       }
+     }
+   }
+   ```
+
+2. **For Extension Mode** (to connect to existing browser tabs):
+
+   ```json
+   {
+     "mcpServers": {
+       "playwright-extension": {
+         "command": "npx",
+         "args": [
+           "@playwright/mcp@latest",
+           "--extension"
+         ]
+       }
+     }
+   }
+   ```
+
+3. **Install the Bridge Extension**:
+   - Download the latest Chrome extension from: https://github.com/microsoft/playwright-mcp/releases
+   - Open Chrome and navigate to `chrome://extensions/`
+   - Enable "Developer mode"
+   - Click "Load unpacked" and select the extension directory
+
+### MCP Server Tools
+
+The MCP server provides a comprehensive set of tools for browser automation:
+
+- **Core Automation**: browser_click, browser_navigate, browser_type, browser_snapshot, etc.
+- **Tab Management**: Create, close, and switch between browser tabs
+- **Form Interaction**: Fill forms, select options, handle dialogs
+- **Data Extraction**: Extract text, attributes, and structured data
+- **Verification**: Verify element visibility, text content, and values
+- **Advanced Features**: PDF generation, coordinate-based interactions, tracing
+
+### Configuration Options
+
+The MCP server supports extensive configuration options:
+
+- Browser selection (Chrome, Firefox, WebKit)
+- Headless/visible mode
+- Viewport size and user agent customization
+- Proxy settings and network controls
+- Session persistence and storage management
+- Security features (allowed/blocked origins)
+
+For detailed configuration information, see [docs/Playwright_MCP.md](docs/Playwright_MCP.md) and [docs/Playwright_MCP_Bridge_Extension_Guide.md](docs/Playwright_MCP_Bridge_Extension_Guide.md).
+
 ## Usage
 
 ### Basic Commands
@@ -60,6 +136,11 @@ A lightweight and fast web automation app for personal use, focusing on CLI-base
 - Build a workflow:
   ```bash
   automata build
+  ```
+
+- Start MCP server:
+  ```bash
+  python3.11 -m automata.mcp_server
   ```
 
 - Get help:
@@ -100,7 +181,8 @@ automata/
 │       ├── core/            # Core automation engine
 │       ├── auth/            # Authentication modules
 │       ├── helpers/         # Helper tools
-│       └── workflows/       # Workflow management
+│       ├── workflows/       # Workflow management
+│       └── mcp_server/      # MCP server implementation
 ├── tests/                   # Test files
 ├── docs/                    # Documentation
 ├── venv/                    # Virtual environment

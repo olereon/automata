@@ -96,9 +96,15 @@ class MCPBridgeConnector:
         """
         logger.info(f"Checking browser extension availability on port {self.extension_port}")
         
+        if not self.session:
+            logger.error("HTTP session not initialized")
+            return False
+            
         try:
             # Try to connect to the browser extension
             extension_url = f"http://localhost:{self.extension_port}/json"
+            logger.debug(f"Attempting to connect to extension at {extension_url}")
+            
             async with self.session.get(extension_url, timeout=self.timeout) as response:
                 if response.status == 200:
                     logger.info("Browser extension is available")
@@ -106,8 +112,14 @@ class MCPBridgeConnector:
                 else:
                     logger.warning(f"Browser extension returned status {response.status}")
                     return False
+        except asyncio.TimeoutError:
+            logger.warning(f"Timeout while connecting to browser extension on port {self.extension_port}")
+            return False
+        except aiohttp.ClientError as e:
+            logger.warning(f"HTTP client error while connecting to browser extension: {e}")
+            return False
         except Exception as e:
-            logger.warning(f"Failed to connect to browser extension: {e}")
+            logger.warning(f"Unexpected error while connecting to browser extension: {e}")
             return False
 
     async def _connect_to_server(self, test_mode: bool = False) -> bool:
@@ -121,9 +133,15 @@ class MCPBridgeConnector:
         """
         logger.info(f"Connecting to MCP server at {self.server_url}")
         
+        if not self.session:
+            logger.error("HTTP session not initialized")
+            return False
+        
         # Check if server is available
         try:
             health_url = self.server_url.rstrip('/mcp') + '/health'
+            logger.debug(f"Checking server health at {health_url}")
+            
             async with self.session.get(health_url, timeout=self.timeout) as response:
                 if response.status == 200:
                     logger.info("MCP server health check passed")
@@ -131,13 +149,22 @@ class MCPBridgeConnector:
                     logger.warning(f"MCP server health check returned status {response.status}")
                     if not test_mode:
                         return False
+        except asyncio.TimeoutError:
+            logger.warning(f"Timeout during MCP server health check")
+            if not test_mode:
+                return False
+        except aiohttp.ClientError as e:
+            logger.warning(f"HTTP client error during MCP server health check: {e}")
+            if not test_mode:
+                return False
         except Exception as e:
-            logger.warning(f"Health check failed: {e}")
+            logger.warning(f"Unexpected error during MCP server health check: {e}")
             if not test_mode:
                 return False
         
         # Try to establish WebSocket connection
         ws_url = self.server_url.replace('http://', 'ws://').replace('https://', 'wss://')
+        logger.debug(f"Attempting to connect to WebSocket at {ws_url}")
         
         for attempt in range(self.retry_attempts):
             try:
@@ -145,12 +172,26 @@ class MCPBridgeConnector:
                 self.ws = await self.session.ws_connect(ws_url, timeout=self.timeout)
                 logger.info("WebSocket connection established")
                 return True
-            except Exception as e:
-                logger.warning(f"WebSocket connection attempt {attempt + 1} failed: {e}")
+            except asyncio.TimeoutError:
+                logger.warning(f"WebSocket connection attempt {attempt + 1} timed out")
                 if attempt < self.retry_attempts - 1:
                     await asyncio.sleep(self.retry_delay)
                 else:
-                    logger.error("All WebSocket connection attempts failed")
+                    logger.error("All WebSocket connection attempts failed due to timeout")
+                    return False
+            except aiohttp.ClientError as e:
+                logger.warning(f"WebSocket connection attempt {attempt + 1} failed with client error: {e}")
+                if attempt < self.retry_attempts - 1:
+                    await asyncio.sleep(self.retry_delay)
+                else:
+                    logger.error("All WebSocket connection attempts failed due to client error")
+                    return False
+            except Exception as e:
+                logger.warning(f"WebSocket connection attempt {attempt + 1} failed with unexpected error: {e}")
+                if attempt < self.retry_attempts - 1:
+                    await asyncio.sleep(self.retry_delay)
+                else:
+                    logger.error("All WebSocket connection attempts failed due to unexpected error")
                     return False
         
         return False

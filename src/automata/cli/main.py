@@ -33,10 +33,12 @@ logger = get_logger(__name__)
 
 @click.group()
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose logging')
-@click.option('--mcp-bridge', is_flag=True, help='Use MCP Bridge for browser automation')
+@click.option('--mcp-bridge/--no-mcp-bridge', default=False, help='Use MCP Bridge for browser automation')
 @click.option('--mcp-config', type=click.Path(), help='Path to MCP configuration file')
+@click.option('--mcp-server/--no-mcp-server', default=False, help='Use MCP Server for browser automation')
+@click.option('--mcp-server-config', type=click.Path(), help='Path to MCP Server configuration file')
 @click.pass_context
-def cli(ctx, verbose, mcp_bridge, mcp_config):
+def cli(ctx, verbose, mcp_bridge, mcp_config, mcp_server, mcp_server_config):
     """Automata CLI for browser automation and workflow execution."""
     # Set up logging
     if verbose:
@@ -47,6 +49,8 @@ def cli(ctx, verbose, mcp_bridge, mcp_config):
     ctx.obj['verbose'] = verbose
     ctx.obj['mcp_bridge'] = mcp_bridge
     ctx.obj['mcp_config'] = mcp_config
+    ctx.obj['mcp_server'] = mcp_server
+    ctx.obj['mcp_server_config'] = mcp_server_config
 
 
 @cli.command()
@@ -54,27 +58,52 @@ def cli(ctx, verbose, mcp_bridge, mcp_config):
 @click.option('--url', help='URL to navigate to')
 @click.pass_context
 def test(ctx, headless, url):
-    """Test MCP Bridge connection."""
+    """Test browser connection."""
     try:
-        # Get MCP configuration
+        # Get MCP configuration and bridge setting
         mcp_config_path = ctx.obj.get('mcp_config')
+        use_mcp_bridge = ctx.obj.get('mcp_bridge', False)
+        use_mcp_server = ctx.obj.get('mcp_server', False)
+        mcp_server_config_path = ctx.obj.get('mcp_server_config')
         
         # Load MCP configuration (from file if specified, otherwise default)
-        if mcp_config_path:
-            mcp_config = MCPConfiguration()
-            mcp_config.load_from_file(mcp_config_path)
+        if use_mcp_bridge:
+            if mcp_config_path:
+                mcp_config = MCPConfiguration()
+                mcp_config.load_from_file(mcp_config_path)
+            else:
+                mcp_config = MCPConfiguration.load_default()
         else:
-            mcp_config = MCPConfiguration.load_default()
+            mcp_config = None
         
-        # Initialize browser manager with MCP Bridge
+        # Load MCP server configuration if using MCP server
+        if use_mcp_server:
+            if mcp_server_config_path:
+                from ..mcp_server.config import MCPServerConfig
+                mcp_server_config = MCPServerConfig()
+                mcp_server_config.load_from_file(mcp_server_config_path)
+            else:
+                from ..mcp_server.config import MCPServerConfig
+                mcp_server_config = MCPServerConfig.load_default()
+        else:
+            mcp_server_config = None
+        
+        # Initialize browser manager with or without MCP Bridge
         browser_manager = BrowserManager(
             headless=headless,
-            use_mcp_bridge=True,
-            mcp_config=mcp_config
+            use_mcp_bridge=use_mcp_bridge,
+            mcp_config=mcp_config,
+            use_mcp_server=use_mcp_server,
+            mcp_server_config=mcp_server_config
         )
         
         # Start browser
-        echo(style("Starting MCP Bridge...", fg="blue"))
+        if use_mcp_bridge:
+            echo(style("Starting MCP Bridge...", fg="blue"))
+        elif use_mcp_server:
+            echo(style("Starting MCP Server...", fg="blue"))
+        else:
+            echo(style("Starting browser...", fg="blue"))
         asyncio.run(browser_manager.start())
         
         # Navigate to URL if provided
@@ -83,7 +112,10 @@ def test(ctx, headless, url):
             asyncio.run(browser_manager.new_page(url))
         
         # Test basic functionality
-        echo(style("Testing MCP Bridge functionality...", fg="blue"))
+        if use_mcp_bridge:
+            echo(style("Testing MCP Bridge functionality...", fg="blue"))
+        else:
+            echo(style("Testing browser functionality...", fg="blue"))
         
         # Get page title
         try:
@@ -107,13 +139,24 @@ def test(ctx, headless, url):
             echo(style(f"Failed to take snapshot: {e}", fg="red"))
         
         # Stop browser
-        echo(style("Stopping MCP Bridge...", fg="blue"))
+        if use_mcp_bridge:
+            echo(style("Stopping MCP Bridge...", fg="blue"))
+        else:
+            echo(style("Stopping browser...", fg="blue"))
         asyncio.run(browser_manager.stop())
         
-        echo(style("MCP Bridge test completed successfully!", fg="green"))
+        if use_mcp_bridge:
+            echo(style("MCP Bridge test completed successfully!", fg="green"))
+        elif use_mcp_server:
+            echo(style("MCP Server test completed successfully!", fg="green"))
+        else:
+            echo(style("Browser test completed successfully!", fg="green"))
         
     except Exception as e:
-        echo(style(f"Error testing MCP Bridge: {e}", fg="red"))
+        if use_mcp_bridge:
+            echo(style(f"Error testing MCP Bridge: {e}", fg="red"))
+        else:
+            echo(style(f"Error testing browser: {e}", fg="red"))
         sys.exit(1)
 
 
@@ -161,6 +204,8 @@ def generate_selectors(ctx, headless, url, output):
     try:
         # Get MCP configuration if using MCP Bridge
         use_mcp_bridge = ctx.obj.get('mcp_bridge', False)
+        use_mcp_server = ctx.obj.get('mcp_server', False)
+        mcp_server_config_path = ctx.obj.get('mcp_server_config')
         mcp_config_path = ctx.obj.get('mcp_config')
         
         if use_mcp_bridge:
@@ -217,6 +262,8 @@ def run(ctx, headless, workflow, session, output):
     try:
         # Get MCP configuration if using MCP Bridge
         use_mcp_bridge = ctx.obj.get('mcp_bridge', False)
+        use_mcp_server = ctx.obj.get('mcp_server', False)
+        mcp_server_config_path = ctx.obj.get('mcp_server_config')
         mcp_config_path = ctx.obj.get('mcp_config')
         
         if use_mcp_bridge:
@@ -316,6 +363,8 @@ def explore(ctx, url, headless, output):
     try:
         # Get MCP configuration if using MCP Bridge
         use_mcp_bridge = ctx.obj.get('mcp_bridge', False)
+        use_mcp_server = ctx.obj.get('mcp_server', False)
+        mcp_server_config_path = ctx.obj.get('mcp_server_config')
         mcp_config_path = ctx.obj.get('mcp_config')
         
         if use_mcp_bridge:
@@ -376,21 +425,41 @@ def mcp():
 def test(ctx, headless, url, test_mode):
     """Test MCP Bridge connection."""
     try:
-        # Get MCP configuration
+        # Get MCP configuration and bridge setting
         mcp_config_path = ctx.obj.get('mcp_config')
+        use_mcp_bridge = ctx.obj.get('mcp_bridge', False)
+        use_mcp_server = ctx.obj.get('mcp_server', False)
+        mcp_server_config_path = ctx.obj.get('mcp_server_config')
         
         # Load MCP configuration (from file if specified, otherwise default)
-        if mcp_config_path:
-            mcp_config = MCPConfiguration()
-            mcp_config.load_from_file(mcp_config_path)
+        if use_mcp_bridge:
+            if mcp_config_path:
+                mcp_config = MCPConfiguration()
+                mcp_config.load_from_file(mcp_config_path)
+            else:
+                mcp_config = MCPConfiguration.load_default()
         else:
-            mcp_config = MCPConfiguration.load_default()
+            mcp_config = None
         
-        # Initialize browser manager with MCP Bridge
+        # Load MCP server configuration if using MCP server
+        if use_mcp_server:
+            if mcp_server_config_path:
+                from ..mcp_server.config import MCPServerConfig
+                mcp_server_config = MCPServerConfig()
+                mcp_server_config.load_from_file(mcp_server_config_path)
+            else:
+                from ..mcp_server.config import MCPServerConfig
+                mcp_server_config = MCPServerConfig.load_default()
+        else:
+            mcp_server_config = None
+        
+        # Initialize browser manager with or without MCP Bridge
         browser_manager = BrowserManager(
             headless=headless,
-            use_mcp_bridge=True,
-            mcp_config=mcp_config
+            use_mcp_bridge=use_mcp_bridge,
+            mcp_config=mcp_config,
+            use_mcp_server=use_mcp_server,
+            mcp_server_config=mcp_server_config
         )
         
         # Set test mode if specified
@@ -398,14 +467,17 @@ def test(ctx, headless, url, test_mode):
             browser_manager.mcp_bridge_test_mode = True
         
         # Start browser
-        echo(style("Starting MCP Bridge...", fg="blue"))
-        if test_mode:
-            echo(style("Test mode enabled - will continue even if MCP server is not available", fg="yellow"))
+        if use_mcp_bridge:
+            echo(style("Starting MCP Bridge...", fg="blue"))
+            if test_mode:
+                echo(style("Test mode enabled - will continue even if MCP server is not available", fg="yellow"))
+        else:
+            echo(style("Starting browser...", fg="blue"))
         
         try:
             asyncio.run(browser_manager.start())
         except MCPBridgeConnectionError as e:
-            if test_mode:
+            if test_mode and use_mcp_bridge:
                 echo(style(f"MCP Bridge connection failed (expected in test mode): {e}", fg="yellow"))
                 echo(style("MCP Bridge test completed in test mode!", fg="green"))
                 return
@@ -418,7 +490,10 @@ def test(ctx, headless, url, test_mode):
             asyncio.run(browser_manager.new_page(url))
         
         # Test basic functionality
-        echo(style("Testing MCP Bridge functionality...", fg="blue"))
+        if use_mcp_bridge:
+            echo(style("Testing MCP Bridge functionality...", fg="blue"))
+        else:
+            echo(style("Testing browser functionality...", fg="blue"))
         
         # Get page title
         try:
@@ -442,13 +517,24 @@ def test(ctx, headless, url, test_mode):
             echo(style(f"Failed to take snapshot: {e}", fg="red"))
         
         # Stop browser
-        echo(style("Stopping MCP Bridge...", fg="blue"))
+        if use_mcp_bridge:
+            echo(style("Stopping MCP Bridge...", fg="blue"))
+        else:
+            echo(style("Stopping browser...", fg="blue"))
         asyncio.run(browser_manager.stop())
         
-        echo(style("MCP Bridge test completed successfully!", fg="green"))
+        if use_mcp_bridge:
+            echo(style("MCP Bridge test completed successfully!", fg="green"))
+        elif use_mcp_server:
+            echo(style("MCP Server test completed successfully!", fg="green"))
+        else:
+            echo(style("Browser test completed successfully!", fg="green"))
         
     except Exception as e:
-        echo(style(f"Error testing MCP Bridge: {e}", fg="red"))
+        if use_mcp_bridge:
+            echo(style(f"Error testing MCP Bridge: {e}", fg="red"))
+        else:
+            echo(style(f"Error testing browser: {e}", fg="red"))
         sys.exit(1)
 
 
@@ -458,3 +544,207 @@ engine = AutomationEngine()
 
 if __name__ == '__main__':
     cli()
+
+# MCP Server command group
+@cli.group()
+def mcp_server():
+    """MCP Server commands."""
+    pass
+
+
+@mcp_server.command()
+@click.option('--config', type=click.Path(), help='Path to MCP server configuration file')
+@click.option('--host', default='localhost', help='Host to bind to')
+@click.option('--port', default=8080, help='Port to bind to')
+@click.option('--log-level', default='INFO', help='Log level')
+@click.pass_context
+def start(ctx, config, host, port, log_level):
+    """Start the MCP server."""
+    try:
+        echo(style("Starting MCP server...", fg="blue"))
+        
+        # Import here to avoid circular dependencies
+        from ..mcp_server.server import MCPServer
+        from ..mcp_server.config import MCPServerConfig
+        
+        # Load configuration
+        if config:
+            mcp_config = MCPServerConfig()
+            mcp_config.load_from_file(config)
+        else:
+            mcp_config = MCPServerConfig.load_default()
+        
+        # Override with command line options
+        mcp_config.set_server_host(host)
+        mcp_config.set_server_port(port)
+        mcp_config.set_log_level(log_level)
+        
+        # Start server
+        server = MCPServer(mcp_config)
+        
+        # Run server in asyncio event loop
+        async def run_server():
+            runner = await server.start()
+            echo(style(f"MCP server started on {host}:{port}", fg="green"))
+            echo(style("Press Ctrl+C to stop the server", fg="yellow"))
+            
+            # Keep server running
+            try:
+                await asyncio.Future()  # Run forever
+            except asyncio.CancelledError:
+                echo(style("Shutting down MCP server...", fg="yellow"))
+            finally:
+                await server.stop(runner)
+                echo(style("MCP server stopped", fg="green"))
+        
+        # Run the server
+        asyncio.run(run_server())
+        
+    except KeyboardInterrupt:
+        echo(style("\nMCP server stopped by user", fg="yellow"))
+    except Exception as e:
+        echo(style(f"Error starting MCP server: {e}", fg="red"))
+        sys.exit(1)
+
+
+@mcp_server.command()
+@click.option('--host', default='localhost', help='Host of the MCP server')
+@click.option('--port', default=8080, help='Port of the MCP server')
+@click.pass_context
+def stop(ctx, host, port):
+    """Stop the MCP server."""
+    try:
+        echo(style("Stopping MCP server...", fg="blue"))
+        
+        # Import here to avoid circular dependencies
+        import aiohttp
+        
+        # Send stop request to server
+        stop_url = f"http://{host}:{port}/stop"
+        
+        async def send_stop_request():
+            async with aiohttp.ClientSession() as session:
+                try:
+                    async with session.post(stop_url) as response:
+                        if response.status == 200:
+                            echo(style("MCP server stopped successfully", fg="green"))
+                        else:
+                            echo(style(f"Failed to stop MCP server: HTTP {response.status}", fg="red"))
+                except aiohttp.ClientError as e:
+                    echo(style(f"Error connecting to MCP server: {e}", fg="red"))
+        
+        # Send stop request
+        asyncio.run(send_stop_request())
+        
+    except Exception as e:
+        echo(style(f"Error stopping MCP server: {e}", fg="red"))
+        sys.exit(1)
+
+
+@mcp_server.command()
+@click.option('--host', default='localhost', help='Host of the MCP server')
+@click.option('--port', default=8080, help='Port of the MCP server')
+@click.pass_context
+def restart(ctx, host, port):
+    """Restart the MCP server."""
+    try:
+        echo(style("Restarting MCP server...", fg="blue"))
+        
+        # Stop server
+        ctx.invoke(stop, host=host, port=port)
+        
+        # Wait a bit for server to stop
+        import time
+        time.sleep(1)
+        
+        # Start server
+        ctx.invoke(start, host=host, port=port)
+        
+    except Exception as e:
+        echo(style(f"Error restarting MCP server: {e}", fg="red"))
+        sys.exit(1)
+
+
+@mcp_server.command()
+@click.option('--host', default='localhost', help='Host of the MCP server')
+@click.option('--port', default=8080, help='Port of the MCP server')
+@click.pass_context
+def status(ctx, host, port):
+    """Check the status of the MCP server."""
+    try:
+        echo(style("Checking MCP server status...", fg="blue"))
+        
+        # Import here to avoid circular dependencies
+        import aiohttp
+        
+        # Send health check request to server
+        health_url = f"http://{host}:{port}/health"
+        
+        async def check_status():
+            async with aiohttp.ClientSession() as session:
+                try:
+                    async with session.get(health_url) as response:
+                        if response.status == 200:
+                            data = await response.json()
+                            echo(style(f"MCP server is running on {host}:{port}", fg="green"))
+                            echo(style(f"Version: {data.get('version', 'unknown')}", fg="green"))
+                            echo(style(f"Platform: {data.get('platform', 'unknown')}", fg="green"))
+                            echo(style(f"Python version: {data.get('python_version', 'unknown')}", fg="green"))
+                        else:
+                            echo(style(f"MCP server is not responding: HTTP {response.status}", fg="red"))
+                except aiohttp.ClientError as e:
+                    echo(style(f"MCP server is not running or not reachable: {e}", fg="red"))
+        
+        # Check status
+        asyncio.run(check_status())
+        
+    except Exception as e:
+        echo(style(f"Error checking MCP server status: {e}", fg="red"))
+        sys.exit(1)
+
+
+@mcp_server.command()
+@click.option('--config', type=click.Path(), help='Path to MCP server configuration file')
+@click.option('--host', default='localhost', help='Host to bind to')
+@click.option('--port', default=8080, help='Port to bind to')
+@click.option('--browser-type', default='chromium', help='Browser type (chromium, firefox, webkit)')
+@click.option('--headless/--no-headless', default=True, help='Run browser in headless mode')
+@click.option('--timeout', default=30000, help='Timeout in milliseconds')
+@click.option('--max-connections', default=10, help='Maximum number of connections')
+@click.option('--log-level', default='INFO', help='Log level')
+@click.option('--extension-mode/--no-extension-mode', default=False, help='Enable extension mode')
+@click.pass_context
+def configure(ctx, config, host, port, browser_type, headless, timeout, max_connections, log_level, extension_mode):
+    """Configure MCP server settings."""
+    try:
+        echo(style("Configuring MCP server...", fg="blue"))
+        
+        # Import here to avoid circular dependencies
+        from ..mcp_server.config import MCPServerConfig
+        
+        # Load configuration
+        if config:
+            mcp_config = MCPServerConfig()
+            mcp_config.load_from_file(config)
+        else:
+            mcp_config = MCPServerConfig.load_default()
+        
+        # Set configuration values
+        mcp_config.set_server_host(host)
+        mcp_config.set_server_port(port)
+        mcp_config.set_browser_type(browser_type)
+        mcp_config.set_headless(headless)
+        mcp_config.set_timeout(timeout)
+        mcp_config.set_max_connections(max_connections)
+        mcp_config.set_log_level(log_level)
+        
+        # Save configuration
+        config_path = Path.home() / ".automata" / "mcp_server_config.json"
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        mcp_config.save_to_file(str(config_path))
+        
+        echo(style(f"MCP server configuration saved to: {config_path}", fg="green"))
+        
+    except Exception as e:
+        echo(style(f"Error configuring MCP server: {e}", fg="red"))
+        sys.exit(1)

@@ -1,53 +1,34 @@
 """
-MCP Client module for communicating with Playwright MCP server.
+MCP client for communicating with the MCP server.
 """
 
 import asyncio
 import json
-import uuid
-from typing import Dict, Any, List, Optional, Union
-from urllib.parse import urlparse
+import logging
+from typing import Dict, List, Any, Optional, Callable, Awaitable
 
 import aiohttp
-import websockets
+from aiohttp import WSMsgType, ClientWebSocketResponse
 
-from ..core.logger import get_logger
-
-logger = get_logger(__name__)
-
-
-class MCPClientError(Exception):
-    """Base exception for MCP client errors."""
-    pass
+from src.automata.mcp.client import MCPConnectionError, MCPClientError, MCPToolError
+from src.automata.core.connection_error_handler import ConnectionErrorHandler
 
 
-class MCPConnectionError(MCPClientError):
-    """Exception raised when MCP connection fails."""
-    pass
-
-
-class MCPProtocolError(MCPClientError):
-    """Exception raised when MCP protocol error occurs."""
-    pass
-
-
-class MCPToolError(MCPClientError):
-    """Exception raised when MCP tool execution fails."""
-    pass
+logger = logging.getLogger(__name__)
 
 
 class MCPClient:
     """
-    Client for communicating with Playwright MCP server.
+    Client for communicating with the MCP server.
     
-    This class handles connection establishment, management, and message passing
-    for MCP protocol, supporting both WebSocket and HTTP+POST+SSE transports.
+    This client handles the connection to the MCP server, including
+    connection retries and error handling.
     """
-
+    
     def __init__(
         self,
-        server_url: str = "ws://localhost:8080",
-        timeout: int = 30000,
+        server_url: str,
+        timeout: int = 5000,
         retry_attempts: int = 3,
         retry_delay: int = 1000,
         extension_mode: bool = False,
@@ -58,11 +39,11 @@ class MCPClient:
         
         Args:
             server_url: URL of the MCP server
-            timeout: Timeout in milliseconds
-            retry_attempts: Number of retry attempts
-            retry_delay: Delay between retries in milliseconds
-            extension_mode: Whether to use extension mode
-            extension_port: Port for extension mode
+            timeout: Connection timeout in milliseconds
+            retry_attempts: Number of connection retry attempts
+            retry_delay: Delay between retry attempts in milliseconds
+            extension_mode: Whether to connect in extension mode
+            extension_port: Port to use for extension mode
         """
         self.server_url = server_url
         self.timeout = timeout / 1000  # Convert to seconds
@@ -71,27 +52,17 @@ class MCPClient:
         self.extension_mode = extension_mode
         self.extension_port = extension_port
         
-        # Parse URL to determine transport type
-        parsed_url = urlparse(server_url)
-        self.transport_type = parsed_url.scheme
-        self.host = parsed_url.hostname
-        self.port = parsed_url.port
-        
-        # Connection state
+        self._session: Optional[aiohttp.ClientSession] = None
+        self._ws: Optional[ClientWebSocketResponse] = None
         self._connected = False
-        self._connection = None
-        self._session = None
-        self._listen_task = None
-        self._sse_url = None
-        
-        # Response handlers
-        self._response_handlers = {}
-        self._request_counter = 0
-        
-        # Server capabilities
-        self._capabilities = {}
-        self._tools = []
-
+        self._message_id = 0
+        self._response_handlers: Dict[str, Callable[[Dict[str, Any]], Awaitable[None]]] = {}
+        self._listen_task: Optional[asyncio.Task] = None
+        self._error_handler = ConnectionErrorHandler(
+            max_retries=retry_attempts,
+            retry_delay=self.retry_delay
+        )
+    
     async def connect(self) -> None:
         """
         Connect to the MCP server.
@@ -105,102 +76,105 @@ class MCPClient:
 
         logger.info(f"Connecting to MCP server at {self.server_url}")
 
+        # First attempt without retry mechanism
+        initial_error = None
         try:
-            # Create HTTP session for REST API calls
-            self._session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.timeout))
+            await self._establish_connection()
+            logger.info("Successfully connected to MCP server")
+            return
+        except Exception as e:
+            logger.error(f"Initial connection attempt failed: {e}")
+            initial_error = e
+            # Don't disconnect yet, we'll try again with the error handler
+        
+        # If the first attempt fails, use the error handler to manage retries
+        try:
+            await self._error_handler.handle_connection_error(
+                initial_error,  # Pass the original error
+                self.server_url,
+                self._establish_connection
+            )
+            
+            logger.info("Successfully connected to MCP server after retries")
 
-            # Check if server is reachable
-            if self.transport_type in ("ws", "wss"):
-                # For WebSocket, check HTTP endpoint first
-                http_url = f"http://{self.host}:{self.port + 1}/health"
-                
-                try:
-                    response = await self._session.get(http_url)
+        except Exception as retry_error:
+            logger.error(f"Failed to connect to MCP server after retries: {retry_error}")
+            await self.disconnect()
+            
+            # Create a more detailed error message
+            if isinstance(retry_error, ConnectionError) and hasattr(retry_error, 'context') and retry_error.context:
+                context = retry_error.context
+                error_message = (
+                    f"Failed to connect to MCP server at {self.server_url}. "
+                    f"Error type: {context.error_type.value}. "
+                    f"Connection attempts: {context.connection_attempts}. "
+                    f"Last error: {context.error_message}. "
+                    f"Please check the server status and network connection."
+                )
+                raise MCPConnectionError(error_message, context)
+            else:
+                raise MCPConnectionError(f"Failed to connect to MCP server: {retry_error}")
+    
+    async def _establish_connection(self) -> None:
+        """
+        Establish a connection to the MCP server.
+        
+        Raises:
+            MCPConnectionError: If connection fails
+        """
+        # Create a new session
+        self._session = aiohttp.ClientSession()
+        
+        if self.extension_mode:
+            # In extension mode, connect to the browser extension via HTTP
+            try:
+                # First check if the extension is available
+                async with self._session.get(
+                    f"http://localhost:{self.extension_port}/json"
+                ) as response:
                     if response.status != 200:
-                        logger.warning(f"MCP server health check returned status: {response.status}")
-                except Exception as e:
-                    logger.warning(f"Health check failed: {e}")
+                        raise MCPConnectionError(
+                            f"Browser extension not available at port {self.extension_port}"
+                        )
                 
-                # Connect via WebSocket for real-time communication
-                self._connection = await websockets.connect(self.server_url)
+                logger.info("Browser extension is available")
+            except Exception as e:
+                await self._session.close()
+                self._session = None
+                raise MCPConnectionError(f"Failed to connect to browser extension: {e}")
+        else:
+            # In server mode, connect to the MCP server via WebSocket
+            try:
+                # First check if the server is available
+                async with self._session.get(self.server_url.replace('ws://', 'http://').replace('wss://', 'https://')) as response:
+                    if response.status != 200:
+                        raise MCPConnectionError(
+                            f"MCP server not available at {self.server_url}"
+                        )
                 
-                # Set connected state before starting listen task
-                self._connected = True
+                # Connect to the WebSocket
+                self._ws = await self._session.ws_connect(self.server_url)
+                logger.info("WebSocket connection established")
                 
                 # Start listening for messages
                 self._listen_task = asyncio.create_task(self._listen_for_messages())
-            elif self.transport_type in ("http", "https"):
-                # For HTTP transport, use SSE for receiving messages
-                self._sse_url = f"{self.server_url}/sse" if not self.server_url.endswith("/sse") else self.server_url
-                
-                # Check if server is reachable
-                try:
-                    response = await self._session.get(f"{self.server_url}/health")
-                    if response.status != 200:
-                        logger.warning(f"MCP server health check returned status: {response.status}")
-                except Exception as e:
-                    logger.warning(f"Health check failed: {e}")
-                
-                # Set connected state before starting listen task
-                self._connected = True
-                
-                # Start listening for SSE messages
-                self._listen_task = asyncio.create_task(self._listen_for_sse_messages())
-            else:
-                raise MCPConnectionError(f"Unsupported transport type: {self.transport_type}")
-
-            # Send initialize message with extension mode if enabled
-            self._request_counter += 1
-            init_message = {
-                "type": "initialize",
-                "protocolVersion": "2024-11-05",
-                "capabilities": {
-                    "tools": {}
-                },
-                "id": str(self._request_counter)
-            }
-            
-            if self.extension_mode:
-                init_message["capabilities"]["browser"] = {
-                    "extension": True,
-                    "port": self.extension_port
-                }
-
-            await self._send_message(init_message)
-
-            # Wait for initialized response
-            response = await self._wait_for_response(str(self._request_counter))
-            if not response.get("success", False):
-                raise MCPConnectionError(f"Failed to initialize MCP connection: {response.get('message', 'Unknown error')}")
-
-            # Store server capabilities
-            if "capabilities" in response:
-                self._capabilities = response["capabilities"]
-
-            logger.info("Successfully connected to MCP server")
-
-        except Exception as e:
-            logger.error(f"Failed to connect to MCP server: {e}")
-            await self.disconnect()
-            raise MCPConnectionError(f"Failed to connect to MCP server: {e}")
-
+            except Exception as e:
+                await self._session.close()
+                self._session = None
+                raise MCPConnectionError(f"Failed to connect to MCP server: {e}")
+        
+        self._connected = True
+    
     async def disconnect(self) -> None:
         """
         Disconnect from the MCP server.
         """
         if not self._connected:
             return
-
+        
         logger.info("Disconnecting from MCP server")
-
-        try:
-            # Send close message if connected
-            if self._connection:
-                await self._send_message({"type": "close"})
-        except Exception as e:
-            logger.warning(f"Failed to send close message: {e}")
-
-        # Cancel listen task
+        
+        # Cancel the listen task if it's running
         if self._listen_task:
             self._listen_task.cancel()
             try:
@@ -208,426 +182,363 @@ class MCPClient:
             except asyncio.CancelledError:
                 pass
             self._listen_task = None
-
-        # Close connection
-        if self._connection:
-            try:
-                if self.transport_type in ("ws", "wss"):
-                    await self._connection.close()
-            except Exception as e:
-                logger.warning(f"Failed to close connection: {e}")
-            self._connection = None
-
-        # Close session
+        
+        # Close the WebSocket connection if it's open
+        if self._ws:
+            await self._ws.close()
+            self._ws = None
+        
+        # Close the HTTP session if it's open
         if self._session:
-            try:
-                await self._session.close()
-            except Exception as e:
-                logger.warning(f"Failed to close session: {e}")
+            await self._session.close()
             self._session = None
-
+        
         self._connected = False
         logger.info("Disconnected from MCP server")
-
+    
     async def is_connected(self) -> bool:
         """
-        Check if connected to the MCP server.
+        Check if the client is connected to the MCP server.
         
         Returns:
             True if connected, False otherwise
         """
-        if not self._connected:
-            return False
-            
-        if self.transport_type in ("ws", "wss"):
-            # Check if WebSocket connection is open
-            if self._connection is None:
-                return False
-            try:
-                # For WebSocket, check if the connection is still open
-                return not self._connection.closed
-            except AttributeError:
-                # If the connection doesn't have a 'closed' attribute,
-                # assume it's still connected if _connected is True
-                return self._connected
+        return self._connected
+    
+    async def _listen_for_messages(self) -> None:
+        """
+        Listen for messages from the MCP server.
+        
+        This method runs in a separate task and handles incoming messages.
+        """
+        if not self._ws:
+            return
+        
+        try:
+            async for msg in self._ws:
+                if msg.type == WSMsgType.TEXT:
+                    try:
+                        data = json.loads(msg.data)
+                        await self._handle_message(data)
+                    except json.JSONDecodeError:
+                        logger.error(f"Received invalid JSON: {msg.data}")
+                elif msg.type == WSMsgType.ERROR:
+                    logger.error(f"WebSocket error: {msg.data}")
+                    break
+                elif msg.type == WSMsgType.CLOSED:
+                    logger.info("WebSocket connection closed")
+                    break
+        except Exception as e:
+            logger.error(f"Error listening for messages: {e}")
+        finally:
+            self._connected = False
+    
+    async def _handle_message(self, data: Dict[str, Any]) -> None:
+        """
+        Handle a message from the MCP server.
+        
+        Args:
+            data: The message data
+        """
+        message_id = data.get("id")
+        
+        if message_id and message_id in self._response_handlers:
+            # This is a response to a request
+            handler = self._response_handlers.pop(message_id)
+            await handler(data)
         else:
-            # For HTTP/SSE, check if session is still active
-            if self._session is None:
-                return False
-            try:
-                return not self._session.closed
-            except AttributeError:
-                # If the session doesn't have a 'closed' attribute,
-                # assume it's still connected if _connected is True
-                return self._connected
-
+            # This is a notification or unsolicited message
+            logger.debug(f"Received message: {data}")
+    
+    async def send_request(
+        self,
+        method: str,
+        params: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Send a request to the MCP server.
+        
+        Args:
+            method: The method name
+            params: The method parameters
+            
+        Returns:
+            The response from the server
+            
+        Raises:
+            MCPConnectionError: If not connected or if the request fails
+        """
+        if not self._connected:
+            raise MCPConnectionError("Not connected to MCP server")
+        
+        # Generate a unique ID for this request
+        self._message_id += 1
+        message_id = str(self._message_id)
+        
+        # Create the request message
+        request = {
+            "jsonrpc": "2.0",
+            "id": message_id,
+            "method": method
+        }
+        
+        if params:
+            request["params"] = params
+        
+        # Create a future to wait for the response
+        future = asyncio.Future()
+        
+        # Create a response handler
+        async def response_handler(data: Dict[str, Any]) -> None:
+            if "error" in data:
+                future.set_exception(MCPClientError(f"RPC error: {data['error']}"))
+            else:
+                future.set_result(data)
+        
+        # Register the response handler
+        self._response_handlers[message_id] = response_handler
+        
+        try:
+            # Send the request
+            if self.extension_mode:
+                # In extension mode, send the request via HTTP POST
+                async with self._session.post(
+                    f"http://localhost:{self.extension_port}/rpc",
+                    json=request
+                ) as response:
+                    if response.status != 200:
+                        raise MCPConnectionError(
+                            f"HTTP request failed with status {response.status}"
+                        )
+                    
+                    # Parse the response
+                    response_data = await response.json()
+                    await response_handler(response_data)
+            else:
+                # In server mode, send the request via WebSocket
+                await self._ws.send_str(json.dumps(request))
+            
+            # Wait for the response
+            return await asyncio.wait_for(future, timeout=self.timeout)
+        
+        except Exception as e:
+            # Remove the response handler if the request fails
+            if message_id in self._response_handlers:
+                del self._response_handlers[message_id]
+            
+            # Cancel the future if it's not done
+            if not future.done():
+                future.cancel()
+            
+            raise MCPConnectionError(f"Request failed: {e}")
+    
     async def get_capabilities(self) -> Dict[str, Any]:
         """
-        Get server capabilities.
+        Get the capabilities of the MCP server.
         
         Returns:
-            Server capabilities dictionary
+            The server capabilities
+            
+        Raises:
+            MCPConnectionError: If not connected or if the request fails
         """
-        if not await self.is_connected():
-            raise MCPConnectionError("Not connected to MCP server")
-        
-        return self._capabilities.copy()
-
+        response = await self.send_request("get_capabilities")
+        return response.get("result", {})
+    
     async def list_tools(self) -> List[Dict[str, Any]]:
         """
-        List available tools on the MCP server.
+        List the available tools on the MCP server.
         
         Returns:
-            List of available tools
-        
+            A list of available tools
+            
         Raises:
-            MCPConnectionError: If not connected to server
-            MCPProtocolError: If listing tools fails
+            MCPConnectionError: If not connected or if the request fails
         """
-        if not await self.is_connected():
-            raise MCPConnectionError("Not connected to MCP server")
-
-        request_id = str(uuid.uuid4())
-        message = {
-            "type": "tools/list",
-            "id": request_id
-        }
-
-        await self._send_message(message)
-        response = await self._wait_for_response(request_id)
-
-        if not response.get("success", False):
-            raise MCPProtocolError(f"Failed to list tools: {response.get('message', 'Unknown error')}")
-
-        tools = response.get("tools", [])
-        self._tools = tools
-        return tools
-
-    async def call_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+        response = await self.send_request("list_tools")
+        return response.get("result", [])
+    
+    async def call_tool(
+        self,
+        tool_name: str,
+        params: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
         Call a tool on the MCP server.
         
         Args:
-            tool_name: Name of the tool to call
-            arguments: Arguments to pass to the tool
-        
+            tool_name: The name of the tool to call
+            params: The parameters to pass to the tool
+            
         Returns:
-            Tool execution result
-        
+            The result of the tool call
+            
         Raises:
-            MCPConnectionError: If not connected to server
-            MCPToolError: If tool execution fails
+            MCPConnectionError: If not connected or if the request fails
         """
-        if not await self.is_connected():
-            raise MCPConnectionError("Not connected to MCP server")
-
-        request_id = str(uuid.uuid4())
-        message = {
-            "type": "tool/call",
-            "toolName": tool_name,
-            "arguments": arguments,
-            "id": request_id
-        }
-
-        await self._send_message(message)
-        response = await self._wait_for_response(request_id)
-
-        if not response.get("success", False):
-            raise MCPToolError(f"Tool call failed: {response.get('message', 'Unknown error')}")
-
+        response = await self.send_request("call_tool", {
+            "name": tool_name,
+            "arguments": params
+        })
         return response.get("result", {})
-
+    
+    # Browser-specific methods
+    
     async def list_tabs(self) -> List[Dict[str, Any]]:
         """
-        List available browser tabs (extension mode only).
+        List the available browser tabs.
         
         Returns:
-            List of browser tabs
-        
+            A list of available tabs
+            
         Raises:
-            MCPConnectionError: If not connected to server
-            MCPProtocolError: If listing tabs fails
+            MCPConnectionError: If not connected or if the request fails
         """
-        if not self.extension_mode:
-            raise MCPProtocolError("Tab listing is only available in extension mode")
-
-        return await self.call_tool("list_tabs", {})
-
+        response = await self.send_request("list_tabs")
+        return response.get("result", [])
+    
     async def select_tab(self, tab_id: str) -> Dict[str, Any]:
         """
-        Select a browser tab (extension mode only).
+        Select a browser tab.
         
         Args:
-            tab_id: ID of the tab to select
-        
+            tab_id: The ID of the tab to select
+            
         Returns:
-            Selection result
-        
+            The result of the tab selection
+            
         Raises:
-            MCPConnectionError: If not connected to server
-            MCPToolError: If tab selection fails
+            MCPConnectionError: If not connected or if the request fails
         """
-        if not self.extension_mode:
-            raise MCPProtocolError("Tab selection is only available in extension mode")
-
-        return await self.call_tool("select_tab", {"tabId": tab_id})
-
+        response = await self.send_request("select_tab", {"tab_id": tab_id})
+        return response.get("result", {})
+    
     async def take_snapshot(self) -> Dict[str, Any]:
         """
-        Take a snapshot of the current page.
+        Take a snapshot of the current browser state.
         
         Returns:
-            Page snapshot
-        
+            The browser snapshot
+            
         Raises:
-            MCPConnectionError: If not connected to server
-            MCPToolError: If snapshot fails
+            MCPConnectionError: If not connected or if the request fails
         """
-        return await self.call_tool("browser_snapshot", {})
-
+        response = await self.send_request("take_snapshot")
+        return response.get("result", {})
+    
     async def navigate_to(self, url: str) -> Dict[str, Any]:
         """
         Navigate to a URL.
         
         Args:
-            url: URL to navigate to
-        
+            url: The URL to navigate to
+            
         Returns:
-            Navigation result
-        
+            The result of the navigation
+            
         Raises:
-            MCPConnectionError: If not connected to server
-            MCPToolError: If navigation fails
+            MCPConnectionError: If not connected or if the request fails
         """
-        return await self.call_tool("browser_navigate", {"url": url})
-
-    async def click_element(self, element: str, ref: str) -> Dict[str, Any]:
+        response = await self.send_request("navigate_to", {"url": url})
+        return response.get("result", {})
+    
+    async def click_element(
+        self,
+        element_description: str,
+        element_ref: Optional[str] = None
+    ) -> Dict[str, Any]:
         """
-        Click on an element.
+        Click an element on the page.
         
         Args:
-            element: Human-readable element description
-            ref: Element reference from snapshot
-        
+            element_description: A description of the element to click
+            element_ref: A reference to the element (optional)
+            
         Returns:
-            Click result
-        
+            The result of the click
+            
         Raises:
-            MCPConnectionError: If not connected to server
-            MCPToolError: If click fails
+            MCPConnectionError: If not connected or if the request fails
         """
-        return await self.call_tool("browser_click", {
-            "element": element,
-            "ref": ref
-        })
-
+        params = {"element_description": element_description}
+        if element_ref:
+            params["element_ref"] = element_ref
+        
+        response = await self.send_request("click_element", params)
+        return response.get("result", {})
+    
     async def fill_form(self, fields: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
-        Fill form fields.
+        Fill a form on the page.
         
         Args:
-            fields: List of field dictionaries with name, type, ref, and value
-        
-        Returns:
-            Form fill result
-        
-        Raises:
-            MCPConnectionError: If not connected to server
-            MCPToolError: If form fill fails
-        """
-        return await self.call_tool("browser_fill_form", {
-            "fields": fields
-        })
-
-    async def type_text(self, element: str, ref: str, text: str) -> Dict[str, Any]:
-        """
-        Type text into an element.
-        
-        Args:
-            element: Human-readable element description
-            ref: Element reference from snapshot
-            text: Text to type
-        
-        Returns:
-            Type result
-        
-        Raises:
-            MCPConnectionError: If not connected to server
-            MCPToolError: If typing fails
-        """
-        return await self.call_tool("browser_type", {
-            "element": element,
-            "ref": ref,
-            "text": text
-        })
-
-    async def wait_for(self, time: Optional[float] = None, text: Optional[str] = None, 
-                      text_gone: Optional[str] = None) -> Dict[str, Any]:
-        """
-        Wait for a condition.
-        
-        Args:
-            time: Time to wait in seconds
-            text: Text to wait for
-            text_gone: Text to wait for to disappear
-        
-        Returns:
-            Wait result
-        
-        Raises:
-            MCPConnectionError: If not connected to server
-            MCPToolError: If wait fails
-        """
-        arguments = {}
-        if time is not None:
-            arguments["time"] = time
-        if text is not None:
-            arguments["text"] = text
-        if text_gone is not None:
-            arguments["textGone"] = text_gone
-        
-        return await self.call_tool("browser_wait_for", arguments)
-
-    async def _send_message(self, message: Dict[str, Any]) -> None:
-        """
-        Send a message to the MCP server.
-        
-        Args:
-            message: Message to send
-        
-        Raises:
-            MCPConnectionError: If not connected to server
-        """
-        if not await self.is_connected():
-            raise MCPConnectionError("Not connected to MCP server")
-
-        # Add ID if not present
-        if "id" not in message:
-            self._request_counter += 1
-            message["id"] = str(self._request_counter)
-
-        try:
-            if self.transport_type in ("ws", "wss"):
-                # Send via WebSocket
-                await self._connection.send(json.dumps(message))
-            elif self.transport_type in ("http", "https"):
-                # Send via HTTP POST
-                async with self._session.post(self.server_url, json=message) as response:
-                    if response.status != 200:
-                        raise MCPConnectionError(f"HTTP POST failed with status {response.status}")
+            fields: A list of form fields to fill
             
-            logger.debug(f"Sent message: {message}")
-        except Exception as e:
-            logger.error(f"Failed to send message: {e}")
-            raise MCPConnectionError(f"Failed to send message: {e}")
-
-    async def _listen_for_messages(self) -> None:
-        """
-        Listen for messages from the MCP server via WebSocket.
-        """
-        try:
-            async for message in self._connection:
-                try:
-                    data = json.loads(message)
-                    logger.debug(f"Received message: {data}")
-                    await self._handle_message(data)
-                except json.JSONDecodeError as e:
-                    logger.error(f"Failed to decode message: {e}")
-                except Exception as e:
-                    logger.error(f"Failed to handle message: {e}")
-        except websockets.exceptions.ConnectionClosed:
-            logger.info("Connection closed")
-        except Exception as e:
-            logger.error(f"Error listening for messages: {e}")
-        finally:
-            self._connected = False
-            logger.info("Stopped listening for messages")
-
-    async def _listen_for_sse_messages(self) -> None:
-        """
-        Listen for messages from the MCP server via SSE.
-        """
-        try:
-            async with self._session.get(self._sse_url) as response:
-                if response.status != 200:
-                    raise MCPConnectionError(f"SSE connection failed with status {response.status}")
-                
-                # Process SSE stream
-                async for line in response.content:
-                    line = line.decode('utf-8').strip()
-                    
-                    if not line:
-                        continue
-                    
-                    if line.startswith("data: "):
-                        try:
-                            data = json.loads(line[6:])  # Remove "data: " prefix
-                            logger.debug(f"Received SSE message: {data}")
-                            await self._handle_message(data)
-                        except json.JSONDecodeError as e:
-                            logger.error(f"Failed to decode SSE message: {e}")
-                        except Exception as e:
-                            logger.error(f"Failed to handle SSE message: {e}")
-        except Exception as e:
-            logger.error(f"Error listening for SSE messages: {e}")
-        finally:
-            self._connected = False
-            logger.info("Stopped listening for SSE messages")
-
-    async def _handle_message(self, message: Dict[str, Any]) -> None:
-        """
-        Handle a message from the MCP server.
-        
-        Args:
-            message: Message to handle
-        """
-        message_type = message.get("type")
-        message_id = message.get("id")
-
-        if message_id in self._response_handlers:
-            # This is a response to a request
-            future = self._response_handlers[message_id]
-            if not future.done():
-                future.set_result(message)
-            del self._response_handlers[message_id]
-        elif message_type == "error":
-            # Handle error message
-            logger.error(f"Received error message: {message}")
-        else:
-            # Handle other message types
-            logger.debug(f"Received unhandled message: {message}")
-
-    async def _wait_for_response(self, request_id: str) -> Dict[str, Any]:
-        """
-        Wait for a response to a specific request.
-        
-        Args:
-            request_id: ID of the request to wait for
-        
         Returns:
-            Response message
-        
+            The result of the form filling
+            
         Raises:
-            MCPConnectionError: If waiting times out or connection is lost
+            MCPConnectionError: If not connected or if the request fails
         """
-        # Check if we already have a future for this request
-        if request_id in self._response_handlers:
-            future = self._response_handlers[request_id]
-        else:
-            # Create a new future for the response
-            future = asyncio.Future()
-            self._response_handlers[request_id] = future
-
-        try:
-            # Wait for the response with timeout
-            return await asyncio.wait_for(future, timeout=self.timeout)
-        except asyncio.TimeoutError:
-            logger.error(f"Timeout waiting for response to request {request_id}")
-            raise MCPConnectionError(f"Timeout waiting for response to request {request_id}")
-        except Exception as e:
-            logger.error(f"Error waiting for response to request {request_id}: {e}")
-            raise MCPConnectionError(f"Error waiting for response to request {request_id}: {e}")
-        finally:
-            # Clean up response handler
-            if request_id in self._response_handlers:
-                del self._response_handlers[request_id]
+        response = await self.send_request("fill_form", {"fields": fields})
+        return response.get("result", {})
+    
+    async def type_text(
+        self,
+        element_description: str,
+        element_ref: Optional[str] = None,
+        text: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Type text into an element on the page.
+        
+        Args:
+            element_description: A description of the element to type into
+            element_ref: A reference to the element (optional)
+            text: The text to type (optional)
+            
+        Returns:
+            The result of the typing
+            
+        Raises:
+            MCPConnectionError: If not connected or if the request fails
+        """
+        params = {"element_description": element_description}
+        if element_ref:
+            params["element_ref"] = element_ref
+        if text:
+            params["text"] = text
+        
+        response = await self.send_request("type_text", params)
+        return response.get("result", {})
+    
+    async def wait_for(
+        self,
+        time: Optional[float] = None,
+        text: Optional[str] = None,
+        text_gone: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Wait for a condition to be met.
+        
+        Args:
+            time: Time to wait in seconds (optional)
+            text: Text to wait for (optional)
+            text_gone: Text to wait for to disappear (optional)
+            
+        Returns:
+            The result of the wait
+            
+        Raises:
+            MCPConnectionError: If not connected or if the request fails
+        """
+        params = {}
+        if time is not None:
+            params["time"] = time
+        if text is not None:
+            params["text"] = text
+        if text_gone is not None:
+            params["text_gone"] = text_gone
+        
+        response = await self.send_request("wait_for", params)
+        return response.get("result", {})
