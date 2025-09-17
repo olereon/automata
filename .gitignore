@@ -34,8 +34,6 @@ fixed_selectors.json
 # Issue report files
 *_issue_report.md
 
-# MCP server implementation (temporary)
-src/automata/mcp_server/
 
 # Debug files
 debug_*.py

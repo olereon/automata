@@ -29,13 +29,6 @@ class SessionManager:
             session_dir: Directory to store session files
             encryption_key: Key for encrypting session data
         """
-        """
-        Initialize the session manager.
-
-        Args:
-            session_dir: Directory to store session files
-            encryption_key: Key for encrypting session data
-        """
         self.session_dir = Path(session_dir) if session_dir else Path.home() / ".automata" / "sessions"
         self.session_dir.mkdir(parents=True, exist_ok=True)
         
@@ -156,18 +149,6 @@ class SessionManager:
         Returns:
             Path to the saved session file
         """
-        """
-        Save a browser session.
-
-        Args:
-            browser_manager: BrowserManager instance
-            session_id: ID for the session
-            include_storage: Whether to include localStorage and sessionStorage
-            expiry_days: Number of days until session expires
-
-        Returns:
-            Path to the saved session file
-        """
         logger.info(f"DEBUG: SessionManager.save_session called with session_id: {session_id}")
         logger.info(f"DEBUG: SessionManager.save_session - include_storage: {include_storage}, expiry_days: {expiry_days}")
         
@@ -207,34 +188,6 @@ class SessionManager:
             logger.info(f"DEBUG: SessionManager: Session save process completed: {session_path}")
             return str(session_path)
         
-        # Save MCP server session if enabled
-        if hasattr(browser_manager, "use_mcp_server") and browser_manager.use_mcp_server and browser_manager.mcp_server:
-            logger.info(f"DEBUG: SessionManager: Saving MCP server session...")
-            try:
-                # Get MCP server session data
-                mcp_session_data = {
-                    "session_id": session_id,
-                    "created_at": datetime.now().isoformat(),
-                    "expiry_days": expiry_days or self.default_expiry_days,
-                    "metadata": {
-                        "saved_at": datetime.now().isoformat(),
-                        "version": "1.0",
-                        "type": "mcp_server"
-                    }
-                }
-                
-                # Encrypt data if encryption is enabled
-                encrypted_mcp_data = self._encrypt_data(mcp_session_data)
-                
-                # Save MCP server session data
-                mcp_session_path = self.session_dir / f"{session_id}_mcp.json"
-                with open(mcp_session_path, "w", encoding="utf-8") as f:
-                    json.dump(encrypted_mcp_data, f, indent=2, default=str)
-                
-                logger.info(f"DEBUG: SessionManager: MCP server session saved: {mcp_session_path}")
-            except Exception as e:
-                logger.error(f"DEBUG: SessionManager: Error saving MCP server session: {e}")
-        
         except Exception as e:
             logger.error(f"DEBUG: SessionManager: Error during session save process: {e}")
             logger.error(f"DEBUG: SessionManager: Error type: {type(e).__name__}")
@@ -244,17 +197,6 @@ class SessionManager:
 
     async def load_session(self, browser_manager, session_id: str, 
                           include_storage: bool = True) -> bool:
-        """
-        Load a browser session.
-
-        Args:
-            browser_manager: BrowserManager instance
-            session_id: ID of the session to load
-            include_storage: Whether to load localStorage and sessionStorage
-
-        Returns:
-            True if session was loaded successfully, False otherwise
-        """
         """
         Load a browser session.
 
@@ -287,49 +229,40 @@ class SessionManager:
             
             # Load session using browser manager
             result = await browser_manager.load_session(session_id, include_storage)
-        
-        # Load MCP server session if enabled and regular session was loaded successfully
-        if result and hasattr(browser_manager, "use_mcp_server") and browser_manager.use_mcp_server:
-            logger.info(f"DEBUG: SessionManager: Loading MCP server session...")
-            try:
-                mcp_session_path = self.session_dir / f"{session_id}_mcp.json"
-                
-                if mcp_session_path.exists():
-                    # Load MCP server session data
-                    with open(mcp_session_path, "r", encoding="utf-8") as f:
-                        encrypted_mcp_data = json.load(f)
+            
+            # Load MCP server session if enabled and regular session was loaded successfully
+            if result and hasattr(browser_manager, "use_mcp_server") and browser_manager.use_mcp_server:
+                logger.info(f"DEBUG: SessionManager: Loading MCP server session...")
+                try:
+                    mcp_session_path = self.session_dir / f"{session_id}_mcp.json"
                     
-                    # Decrypt data if encryption is enabled
-                    mcp_session_data = self._decrypt_data(encrypted_mcp_data)
-                    
-                    # Check if session has expired
-                    if self._is_session_expired(mcp_session_data):
-                        logger.warning(f"MCP server session has expired: {session_id}")
-                        return result
-                    
-                    # TODO: Restore MCP server session state
-                    logger.info(f"DEBUG: SessionManager: MCP server session loaded successfully")
-                else:
-                    logger.info(f"DEBUG: SessionManager: No MCP server session found for: {session_id}")
-            except Exception as e:
-                logger.error(f"DEBUG: SessionManager: Error loading MCP server session: {e}")
-        
-        return result
-        
+                    if mcp_session_path.exists():
+                        # Load MCP server session data
+                        with open(mcp_session_path, "r", encoding="utf-8") as f:
+                            encrypted_mcp_data = json.load(f)
+                        
+                        # Decrypt data if encryption is enabled
+                        mcp_session_data = self._decrypt_data(encrypted_mcp_data)
+                        
+                        # Check if session has expired
+                        if self._is_session_expired(mcp_session_data):
+                            logger.warning(f"MCP server session has expired: {session_id}")
+                            return result
+                        
+                        # TODO: Restore MCP server session state
+                        logger.info(f"DEBUG: SessionManager: MCP server session loaded successfully")
+                    else:
+                        logger.info(f"DEBUG: SessionManager: No MCP server session found for: {session_id}")
+                except Exception as e:
+                    logger.error(f"DEBUG: SessionManager: Error loading MCP server session: {e}")
+            
+            return result
+            
         except Exception as e:
             logger.error(f"Error loading session: {e}")
             return False
 
     async def delete_session(self, session_id: str) -> bool:
-        """
-        Delete a saved session.
-
-        Args:
-            session_id: ID of the session to delete
-
-        Returns:
-            True if session was deleted successfully, False otherwise
-        """
         """
         Delete a saved session.
 
@@ -356,10 +289,6 @@ class SessionManager:
                     logger.error(f"Error deleting MCP server session: {e}")
             
             return True
-            else:
-                logger.warning(f"Session file not found: {session_path}")
-                return False
-        
         except Exception as e:
             logger.error(f"Error deleting session: {e}")
             return False

@@ -103,8 +103,8 @@ Before setting up the MCP Bridge extension, ensure you have the following:
        },
        "contextOptions": {
          "viewport": {
-           "width": 1280,
-           "height": 720
+           "width": 1920,
+           "height": 1080
          }
        }
      },

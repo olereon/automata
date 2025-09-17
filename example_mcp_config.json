@@ -1,0 +1,27 @@
+{
+  "server": {
+    "host": "localhost",
+    "port": 8080,
+    "log_level": "INFO"
+  },
+  "browser": {
+    "browserName": "chromium",
+    "headless": false,
+    "launchOptions": {
+      "channel": "chrome"
+    },
+    "contextOptions": {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      }
+    }
+  },
+  "capabilities": [
+    "tabs",
+    "pdf"
+  ],
+  "outputDir": "./output",
+  "extension_mode": true,
+  "extension_port": 9222
+}
